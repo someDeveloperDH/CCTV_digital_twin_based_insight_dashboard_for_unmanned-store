@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+node_modules/
+dist/
+
+# 모델 가중치 (용량 큰 파일)
+*.pt
+checkpoints/
+checkpoints_crossformer/
+
+# 영상 데이터
+*.mp4
+
+# 빌드 / 실행 산출물
+output/
+*.log
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.env
+claude.md
