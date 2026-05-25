@@ -13,85 +13,88 @@ const CUSTOMER_CLASSES = {
   minor_female: { label: '미성년 여성' },
 };
 
+// 실제 아이스크림 무인매장 KPI 기반 구역 (Dashboard.jsx와 동일)
 const ZONES = [
-  { id: 'snack',      label: '과자/스낵',  x:  20, y:  50, w: 165, h: 70,
-    preferred: ['minor_male', 'minor_female'],
+  { id: 'ice1',     label: '아이스크림1', x:  15, y:  45, w: 240, h: 65,
+    preferred: ['adult_male'],
+    conversionRate: 0.50, dwellRange: [3, 10],
     items: [
-      { name: '새우깡', price: 1500 }, { name: '포카칩', price: 1800 },
-      { name: '초코파이', price: 2500 }, { name: '오레오', price: 2200 },
-      { name: '프링글스', price: 2800 }, { name: '허니버터칩', price: 2000 },
-      { name: '꼬깔콘', price: 1200 }, { name: '빠다코코낫', price: 1500 },
-      { name: '젤리', price: 1000 }, { name: '사탕', price: 800 },
+      { name: '수박바', price: 700 }, { name: '스크류바', price: 600 },
+      { name: '죠스바', price: 700 }, { name: '쮸쮸바', price: 400 },
+      { name: '아이스바', price: 800 },
     ],
   },
-  { id: 'beverage',   label: '음료',       x: 210, y:  50, w: 165, h: 70,
+  { id: 'ice2',     label: '아이스크림2', x: 275, y:  45, w: 240, h: 65,
+    preferred: ['adult_male'],
+    conversionRate: 1.00, dwellRange: [5, 15],
+    items: [
+      { name: '나뚜루파인트', price: 3000 }, { name: '하겐다즈', price: 3500 },
+      { name: '투게더', price: 2500 }, { name: '아이스세트', price: 2800 },
+      { name: '메로나4입', price: 2400 },
+    ],
+  },
+  { id: 'ice3',     label: '아이스크림3', x: 535, y:  45, w: 240, h: 65,
+    preferred: ['adult_male', 'adult_female'],
+    conversionRate: 0.71, dwellRange: [4, 12],
+    items: [
+      { name: '비비빅', price: 1400 }, { name: '부라보콘', price: 1200 },
+      { name: '구구콘', price: 1200 }, { name: '빵빠레', price: 1400 },
+      { name: '메로나', price: 600 }, { name: '조각케이크', price: 1800 },
+    ],
+  },
+  { id: 'ice4',     label: '아이스크림4', x:  15, y: 165, w: 240, h: 65,
+    preferred: ['adult_male', 'minor_female'],
+    conversionRate: 1.00, dwellRange: [8, 20],
+    items: [
+      { name: '투게더대', price: 2000 }, { name: '프리미엄하드', price: 1800 },
+      { name: '아이스케이크', price: 2500 }, { name: '대용량아이스', price: 1500 },
+      { name: '특대아이스바', price: 1400 },
+    ],
+  },
+  { id: 'ice5',     label: '아이스크림5', x: 275, y: 165, w: 240, h: 65,
     preferred: ['adult_male', 'adult_female', 'minor_male', 'minor_female'],
+    conversionRate: 0.89, dwellRange: [3, 12],
     items: [
-      { name: '콜라', price: 1500 }, { name: '사이다', price: 1500 },
-      { name: '커피', price: 2000 }, { name: '주스', price: 2500 },
-      { name: '이온음료', price: 1800 }, { name: '녹차', price: 1200 },
-      { name: '에너지드링크', price: 2200 }, { name: '우유', price: 1800 },
-      { name: '두유', price: 1500 }, { name: '탄산수', price: 1200 },
+      { name: '카나페', price: 1200 }, { name: '설레임', price: 1200 },
+      { name: '탱크보이', price: 800 }, { name: '스크류바', price: 600 },
+      { name: '수박바', price: 600 }, { name: '죠스바', price: 600 },
     ],
   },
-  { id: 'daily',      label: '생활용품',   x: 400, y:  50, w: 165, h: 70,
+  { id: 'ice6',     label: '아이스크림6', x: 535, y: 165, w: 240, h: 65,
+    preferred: ['adult_male', 'minor_male'],
+    conversionRate: 0.70, dwellRange: [5, 20],
+    items: [
+      { name: '월드콘', price: 1200 }, { name: '빵빠레', price: 1200 },
+      { name: '구구콘', price: 1200 }, { name: '아이스샌드', price: 1800 },
+      { name: '하드보스', price: 1200 }, { name: '허니버터아이스', price: 1800 },
+      { name: '누가바', price: 1800 }, { name: '와사비맛', price: 600 },
+    ],
+  },
+  { id: 'beverage', label: '음료',         x:  15, y: 285, w: 240, h: 65,
     preferred: ['adult_male', 'adult_female'],
+    conversionRate: 0.75, dwellRange: [3, 10],
     items: [
-      { name: '샴푸', price: 8000 }, { name: '치약', price: 3500 },
-      { name: '세제', price: 5000 }, { name: '비누', price: 2000 },
-      { name: '칫솔', price: 3000 }, { name: '수건', price: 5000 },
-      { name: '휴지', price: 4500 }, { name: '주방세제', price: 4000 },
-      { name: '핸드크림', price: 6000 }, { name: '바디로션', price: 8000 },
+      { name: '커피', price: 1500 }, { name: '아메리카노', price: 2000 },
+      { name: '카페라떼', price: 2000 }, { name: '포카리스웨트', price: 1800 },
+      { name: '파워에이드', price: 1500 },
     ],
   },
-  { id: 'cosmetic',   label: '화장품',     x: 590, y:  50, w: 165, h: 70,
-    preferred: ['adult_female'],
+  { id: 'snack1',   label: '과자1',        x: 275, y: 285, w: 240, h: 65,
+    preferred: ['adult_male', 'minor_male'],
+    conversionRate: 1.00, dwellRange: [3, 10],
     items: [
-      { name: '립스틱', price: 15000 }, { name: '파운데이션', price: 25000 },
-      { name: '마스카라', price: 12000 }, { name: '아이섀도', price: 18000 },
-      { name: '블러셔', price: 14000 }, { name: '컨실러', price: 16000 },
-      { name: 'BB크림', price: 18000 }, { name: '선크림', price: 20000 },
-      { name: '립밤', price: 8000 }, { name: '아이라이너', price: 12000 },
+      { name: '포테이토칩', price: 1500 }, { name: '크래커', price: 1200 },
+      { name: '초코과자', price: 1800 }, { name: '새우과자', price: 1500 },
+      { name: '콘스낵', price: 1200 },
     ],
   },
-  { id: 'stationery', label: '문구',       x:  20, y: 180, w: 165, h: 70,
-    preferred: ['minor_male', 'minor_female'],
+  { id: 'snack2',   label: '과자2',        x: 535, y: 285, w: 240, h: 65,
+    preferred: ['minor_female', 'minor_male', 'adult_male'],
+    conversionRate: 0.43, dwellRange: [5, 18],
     items: [
-      { name: '색연필', price: 3000 }, { name: '노트', price: 2000 },
-      { name: '펜', price: 1000 }, { name: '스티커', price: 1500 },
-      { name: '형광펜', price: 1500 }, { name: '지우개', price: 500 },
-      { name: '자', price: 1000 }, { name: '풀', price: 1200 },
-      { name: '테이프', price: 1500 }, { name: '스케치북', price: 4000 },
-    ],
-  },
-  { id: 'frozen',     label: '냉동식품',   x: 210, y: 180, w: 165, h: 70,
-    preferred: ['adult_male', 'adult_female'],
-    items: [
-      { name: '아이스크림', price: 2000 }, { name: '만두', price: 5000 },
-      { name: '냉동피자', price: 8000 }, { name: '냉동치킨', price: 9000 },
-      { name: '군만두', price: 6000 }, { name: '냉동볶음밥', price: 4500 },
-      { name: '냉동새우', price: 12000 }, { name: '어묵', price: 3000 },
-      { name: '핫도그', price: 2500 }, { name: '냉동라면', price: 3500 },
-    ],
-  },
-  { id: 'premium',    label: '프리미엄',   x: 400, y: 180, w: 165, h: 70,
-    preferred: ['adult_male', 'adult_female'],
-    items: [
-      { name: '와인', price: 25000 }, { name: '위스키', price: 45000 },
-      { name: '프리미엄커피', price: 12000 }, { name: '수입과자', price: 8000 },
-      { name: '샴페인', price: 35000 }, { name: '럼', price: 28000 },
-      { name: '브랜디', price: 42000 }, { name: '수입초콜릿', price: 15000 },
-      { name: '수입치즈', price: 18000 }, { name: '수입와인', price: 32000 },
-    ],
-  },
-  { id: 'bakery',     label: '베이커리',   x: 590, y: 180, w: 165, h: 70,
-    preferred: ['minor_female', 'adult_female'],
-    items: [
-      { name: '크로아상', price: 3000 }, { name: '케이크', price: 15000 },
-      { name: '샌드위치', price: 4500 }, { name: '마카롱', price: 5000 },
-      { name: '베이글', price: 2500 }, { name: '소금빵', price: 2000 },
-      { name: '시나몬롤', price: 3500 }, { name: '머핀', price: 2500 },
-      { name: '치즈케이크', price: 6000 }, { name: '에클레어', price: 4000 },
+      { name: '바나나킥', price: 500 }, { name: '알감자', price: 500 },
+      { name: '짱구', price: 500 }, { name: '꼬깔콘', price: 800 },
+      { name: '사탕', price: 300 },
     ],
   },
 ];
@@ -230,6 +233,7 @@ function runBatch(config, days) {
 
   let uid = 0;
   const allPurchases = [];
+  const visitLogs = [];
   const totalBuyerSet = new Set();
 
   const startTime = Date.now();
@@ -263,16 +267,29 @@ function runBatch(config, days) {
       let purchased = false;
 
       for (const z of zones) {
-        const dwell = (minor ? 1 + Math.random() * 3 : 3 + Math.random() * 5)
-                      * dwellScale;
+        const [minD, maxD] = z.dwellRange || (minor ? [1, 3] : [3, 5]);
+        const dwell = (minD + Math.random() * (maxD - minD)) * dwellScale;
+        const visitRec = {
+          agentId,
+          classType,
+          zoneId: z.id,
+          zoneLabel: z.label,
+          dwellTime: dwell,
+          day: dayIdx,
+          hour: hourInDay,
+          purchased: false,
+        };
+        visitLogs.push(visitRec);
 
         zoneStats[z.id].visitors++;
         zoneStats[z.id].totalDwell += dwell;
         zoneStats[z.id].visitorsByClass[classType]++;
 
-        const isPref  = z.preferred.includes(classType);
-        const buyProb = Math.min(0.85, Math.max(0.02,
-          (isPref ? 0.35 : 0.08) + purchaseBonus));
+        // 실측 KPI 기반 구역별 전환율 사용
+        const baseProb = z.conversionRate !== undefined
+          ? z.conversionRate
+          : (z.preferred.includes(classType) ? 0.40 : 0.06);
+        const buyProb = Math.min(0.98, Math.max(0.02, baseProb + purchaseBonus));
 
         if (Math.random() < buyProb) {
           const item  = z.items[Math.floor(Math.random() * z.items.length)];
@@ -280,6 +297,9 @@ function runBatch(config, days) {
 
           allPurchases.push({ agentId, classType, zoneId: z.id, zoneLabel: z.label,
                               item: item.name, price, dwellTime: dwell, day: dayIdx, hour: hourInDay });
+          visitRec.purchased = true;
+          visitRec.item = item.name;
+          visitRec.price = price;
 
           zoneStats[z.id].buyers++;
           zoneStats[z.id].buyersByClass[classType]++;
@@ -353,6 +373,7 @@ function runBatch(config, days) {
     totalVisitors: uid,
     totalBuyers:   totalBuyerSet.size,
     purchases:     allPurchases,
+    visitLogs,
     zoneStats, classStats, dailyStats, hourlyStats,
     heatGrids:     heatBuffers,
     elapsed:       Date.now() - startTime,

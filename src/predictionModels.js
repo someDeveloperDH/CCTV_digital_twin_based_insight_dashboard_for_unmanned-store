@@ -3,7 +3,30 @@
 // React 의존성 없음
 
 const CLASS_KEYS = ['adult_male', 'adult_female', 'minor_male', 'minor_female'];
-const ZONE_KEYS  = ['snack', 'beverage', 'daily', 'cosmetic', 'stationery', 'frozen', 'premium', 'bakery'];
+const ZONE_KEYS  = ['ice1', 'ice2', 'ice3', 'ice4', 'ice5', 'ice6', 'beverage', 'snack1', 'snack2'];
+
+// 구역별 선호 고객군 (실측 구매 데이터 기반)
+const PREFERRED_ZONES = {
+  ice1:     ['adult_male', 'adult_female'],
+  ice2:     ['adult_male'],
+  ice3:     ['adult_male', 'adult_female'],
+  ice4:     ['adult_male', 'adult_female', 'minor_female'],
+  ice5:     ['adult_male', 'adult_female', 'minor_male', 'minor_female'], // 전환율 88.9% 최고
+  ice6:     ['adult_male', 'minor_male', 'minor_female'],                  // 방문자·매출 1위
+  beverage: ['adult_male', 'adult_female'],
+  snack1:   ['adult_female', 'minor_male'],
+  snack2:   ['minor_male', 'minor_female'],
+};
+
+// 구역별 아이템 평균가격 (ice_batch_purchases 실측 기반)
+const ZONE_AVG_PRICES = {
+  ice1: 1150, ice2: 1400, ice3: 1400, ice4: 1500,
+  ice5: 750, ice6: 900, beverage: 1750, snack1: 1500, snack2: 500,
+};
+export const MAX_ZONE_AVG = 2000; // beverage 최대가 기준
+
+// 피처 차원 (변경 시 이 상수만 수정하면 됨)
+export const FEAT_DIM = 25; // 15(기존) + 10(상호작용·비선형 feature)
 
 // ── 유틸리티 ────────────────────────────────────────────────────────────────
 
@@ -32,9 +55,9 @@ function shuffle(arr, rng) {
   return arr;
 }
 
-// Feature 벡터 생성 (14차원)
+// Feature 벡터 생성 (FEAT_DIM차원)
 export function buildFeature(classType, zoneId, dwellTime, hour, maxDwell, simHours) {
-  const feat = new Float64Array(14);
+  const feat = new Float64Array(FEAT_DIM);
   // one-hot: 고객분류 (0~3)
   const clsIdx = CLASS_KEYS.indexOf(classType);
   if (clsIdx >= 0) feat[clsIdx] = 1;
@@ -42,22 +65,67 @@ export function buildFeature(classType, zoneId, dwellTime, hour, maxDwell, simHo
   const zIdx = ZONE_KEYS.indexOf(zoneId);
   if (zIdx >= 0) feat[4 + zIdx] = 1;
   // 정규화된 체류시간 (12)
-  feat[12] = maxDwell > 0 ? Math.min(dwellTime / maxDwell, 1) : 0;
+  const dwellNorm = maxDwell > 0 ? Math.min(dwellTime / maxDwell, 1) : 0;
+  feat[12] = dwellNorm;
   // 정규화된 시간대 (13) — 동적 영업시간 기준
   const maxHour = Math.max(1, (simHours || 8) - 1);
-  feat[13] = Math.min(hour / maxHour, 1);
+  const hourNorm = Math.min(hour / maxHour, 1);
+  feat[13] = hourNorm;
+  // 선호 구역 여부 (14) — 구매확률 0.35 vs 0.08 핵심 신호
+  const isPref = (PREFERRED_ZONES[zoneId] || []).includes(classType) ? 1 : 0;
+  feat[14] = isPref;
+
+  // ── 확장 feature (15~24) ──
+  // 선호구역×체류 상호작용: 선호 구역에서 오래 머물수록 구매 신호 증폭
+  feat[15] = isPref * dwellNorm;
+  // 성인 여부
+  feat[16] = classType.startsWith('adult') ? 1 : 0;
+  // 미성년 여부
+  feat[17] = classType.startsWith('minor') ? 1 : 0;
+  // 체류시간 log 변환 (비선형 포착)
+  feat[18] = maxDwell > 0 ? Math.log(1 + dwellTime) / Math.log(1 + maxDwell) : 0;
+  // 체류시간 제곱 (고체류 구간 가중)
+  feat[19] = dwellNorm * dwellNorm;
+  // 구역 평균 가격 정규화 (가격대 신호)
+  feat[20] = (ZONE_AVG_PRICES[zoneId] || 0) / MAX_ZONE_AVG;
+  // 전환율 88.9%의 보편 수요 구역 (ice5는 전 클래스 선호)
+  feat[21] = zoneId === 'ice5' ? 1 : 0;
+  // 미성년 × snack2 강한 교차 신호 (미성년 주요 구매처)
+  feat[22] = (classType.startsWith('minor') && zoneId === 'snack2') ? 1 : 0;
+  // 성년 남성 × ice6 교차 신호 (매출 1위 구역의 지배적 구매자)
+  feat[23] = (classType === 'adult_male' && zoneId === 'ice6') ? 1 : 0;
+  // 시간대 × 선호 구역 (늦은 시간 선호 구역 방문 = 목적 구매)
+  feat[24] = hourNorm * isPref;
+
   return feat;
 }
 
 // ── Logistic Regression ─────────────────────────────────────────────────────
 
+// 매장 유형별 하이퍼파라미터
+// convenience/school/icecream: 양성 편중이 심해 더 긴 학습 + 약한 정규화 + class weight 적용.
+const STORE_HP = {
+  convenience: { epochs: 500, lrInit: 0.08, lambda: 0.0003, classWeight: true,  negRatio: 5 },
+  school:      { epochs: 400, lrInit: 0.1,  lambda: 0.0005, classWeight: false, negRatio: 3 },
+  supermarket: { epochs: 300, lrInit: 0.1,  lambda: 0.001,  classWeight: false, negRatio: 3 },
+  mall:        { epochs: 300, lrInit: 0.1,  lambda: 0.001,  classWeight: false, negRatio: 3 },
+  icecream:    { epochs: 400, lrInit: 0.08, lambda: 0.0005, classWeight: true,  negRatio: 3 }, // 실측 전환율 ~73%
+};
+const DEFAULT_HP = { epochs: 300, lrInit: 0.1, lambda: 0.001, classWeight: false, negRatio: 3 };
+
+function getStoreHP(storeType) {
+  return STORE_HP[storeType] || DEFAULT_HP;
+}
+
 /**
  * 훈련 데이터 생성: 양성(구매) + 음성(방문만) 샘플
  */
-export function buildTrainingSamples(data) {
+export function buildTrainingSamples(data, storeType) {
   const rng = mulberry32(42);
   const { purchases, zoneStats } = data;
+  const visitLogs = data.visitLogs || [];
   const simHours = data.operatingHours || 8;
+  const hp = getStoreHP(storeType);
 
   // 양성 샘플 (최대 3000개)
   let positives = purchases.map(p => ({
@@ -72,34 +140,48 @@ export function buildTrainingSamples(data) {
     positives = positives.slice(0, 3000);
   }
 
-  // 음성 샘플 생성 — 구역×클래스별 비구매 방문 횟수 기반
+  // 음성 샘플 생성 — 방문 로그가 있으면 실제 비구매 방문을 사용
   let negatives = [];
   const posCount = Math.max(positives.length, 1);
-  for (const [zId, zs] of Object.entries(zoneStats)) {
-    if (!ZONE_KEYS.includes(zId)) continue;
-    for (const cls of CLASS_KEYS) {
-      const visitCount = (zs.visitorsByClass && zs.visitorsByClass[cls]) || 0;
-      const buyCount   = (zs.buyersByClass && zs.buyersByClass[cls]) || 0;
-      // 비구매 방문 수, 구역×클래스당 최대 양성의 1배로 cap (과다 방지)
-      let negCount = Math.max(0, visitCount - buyCount);
-      negCount = Math.min(negCount, Math.ceil(posCount / (ZONE_KEYS.length * CLASS_KEYS.length) * 3));
-      const isMinor = cls.startsWith('minor');
-      for (let i = 0; i < negCount; i++) {
-        negatives.push({
-          classType: cls,
-          zoneId: zId,
-          dwellTime: isMinor
-            ? 0.5 + rng() * 2.5
-            : 1.0 + rng() * 5.0,
-          hour: Math.floor(rng() * simHours),  // 동적 영업시간 범위
-          label: 0,
-        });
+  if (visitLogs.length > 0) {
+    const bought = new Set(purchases.map(p => `${p.agentId}|${p.zoneId}|${p.day ?? ''}|${p.hour ?? ''}`));
+    negatives = visitLogs
+      .filter(v => !v.purchased && !bought.has(`${v.agentId}|${v.zoneId}|${v.day ?? ''}|${v.hour ?? ''}`))
+      .map(v => ({
+        classType: v.classType,
+        zoneId: v.zoneId,
+        dwellTime: v.dwellTime,
+        hour: v.hour || 0,
+        label: 0,
+      }));
+  } else {
+    for (const [zId, zs] of Object.entries(zoneStats)) {
+      if (!ZONE_KEYS.includes(zId)) continue;
+      for (const cls of CLASS_KEYS) {
+        const visitCount = (zs.visitorsByClass && zs.visitorsByClass[cls]) || 0;
+        const buyCount   = (zs.buyersByClass && zs.buyersByClass[cls]) || 0;
+        // 비구매 방문 수 — 실제 활성 zone 수 기준으로 cap (죽은 zone 차원에 할당 낭비 방지)
+        const activeZoneCount = data.activeZones?.length || ZONE_KEYS.length;
+        let negCount = Math.max(0, visitCount - buyCount);
+        negCount = Math.min(negCount, Math.ceil(posCount / (activeZoneCount * CLASS_KEYS.length) * hp.negRatio));
+        const isMinor = cls.startsWith('minor');
+        for (let i = 0; i < negCount; i++) {
+          negatives.push({
+            classType: cls,
+            zoneId: zId,
+            dwellTime: isMinor
+              ? 0.5 + rng() * 2.5
+              : 1.0 + rng() * 5.0,
+            hour: Math.floor(rng() * simHours),  // 동적 영업시간 범위
+            label: 0,
+          });
+        }
       }
     }
   }
 
-  // 총 음성 샘플: 양성의 2~3배 유지 (불균형 방지)
-  const maxNeg = posCount * 3;
+  // 총 음성 샘플: 매장 유형별 비율 (편의점/학교는 양성 편중이 크므로 더 확보)
+  const maxNeg = posCount * hp.negRatio;
   if (negatives.length > maxNeg) {
     shuffle(negatives, rng);
     negatives = negatives.slice(0, maxNeg);
@@ -111,13 +193,14 @@ export function buildTrainingSamples(data) {
 /**
  * Logistic Regression 학습 (Mini-batch GD + L2 정규화)
  */
-export function trainLogisticRegression(data) {
-  const { samples, simHours } = buildTrainingSamples(data);
+export function trainLogisticRegression(data, storeType) {
+  const { samples, simHours } = buildTrainingSamples(data, storeType);
   if (samples.length === 0) {
-    return { weights: new Float64Array(14), bias: 0, maxDwell: 10, simHours: simHours || 8, accuracy: 0, auc: 0 };
+    return { weights: new Float64Array(FEAT_DIM), bias: 0, maxDwell: 10, simHours: simHours || 8, accuracy: 0, auc: 0, storeType };
   }
 
   const rng = mulberry32(123);
+  const hp = getStoreHP(storeType);
 
   // 최대 체류시간 산출
   let maxDwell = 0;
@@ -126,30 +209,43 @@ export function trainLogisticRegression(data) {
 
   // Feature 행렬 구축
   const N = samples.length;
-  const D = 14;
+  const D = FEAT_DIM;
   const X = new Float64Array(N * D);
   const y = new Float64Array(N);
+  let posCount = 0;
   for (let i = 0; i < N; i++) {
     const feat = buildFeature(samples[i].classType, samples[i].zoneId, samples[i].dwellTime, samples[i].hour, maxDwell, simHours);
     X.set(feat, i * D);
     y[i] = samples[i].label;
+    if (samples[i].label === 1) posCount++;
   }
+  const negCount = N - posCount;
+
+  // class weight: sqrt(neg/pos), 0.5~2.0 클리핑 — 편의점처럼 양성이 다수일 때도 안전
+  let posWeight = 1;
+  if (hp.classWeight && posCount > 0 && negCount > 0) {
+    const raw = Math.sqrt(negCount / posCount);
+    posWeight = Math.max(0.5, Math.min(2.0, raw));
+  }
+  const negWeight = 1;
 
   // 가중치 초기화
   const w = new Float64Array(D);
   for (let i = 0; i < D; i++) w[i] = (rng() - 0.5) * 0.01;
   let b = 0;
 
-  // 하이퍼파라미터
-  const epochs = 200;
-  const lr = 0.1;
+  // 하이퍼파라미터 (매장 유형별)
+  const epochs = hp.epochs;
+  const lrInit = hp.lrInit;
   const batchSize = 64;
-  const lambda = 0.001;
+  const lambda = hp.lambda;
 
   // 인덱스 배열
   const indices = Array.from({ length: N }, (_, i) => i);
 
   for (let epoch = 0; epoch < epochs; epoch++) {
+    // 50 epoch마다 lr 15% 감소
+    const lr = lrInit * Math.pow(0.85, Math.floor(epoch / 50));
     shuffle(indices, rng);
 
     for (let start = 0; start < N; start += batchSize) {
@@ -166,7 +262,8 @@ export function trainLogisticRegression(data) {
         let z = b;
         for (let j = 0; j < D; j++) z += w[j] * X[idx * D + j];
         const pred = sigmoid(z);
-        const err = pred - y[idx];
+        const weight = y[idx] === 1 ? posWeight : negWeight;
+        const err = (pred - y[idx]) * weight;
         for (let j = 0; j < D; j++) gw[j] += err * X[idx * D + j];
         gb += err;
       }
@@ -179,7 +276,7 @@ export function trainLogisticRegression(data) {
     }
   }
 
-  // 정확도 및 AUC 계산
+  // 정확도 계산 (임계값 0.5)
   const preds = new Float64Array(N);
   let correct = 0;
   for (let i = 0; i < N; i++) {
@@ -224,7 +321,8 @@ export function trainLogisticRegression(data) {
     }
   }
 
-  return { weights: w, bias: b, maxDwell, simHours, accuracy, auc };
+  const baselineAcc = N > 0 ? Math.max(posCount, negCount) / N : 0.5;
+  return { weights: w, bias: b, maxDwell, simHours, accuracy, auc, baselineAcc, storeType };
 }
 
 /**
@@ -233,7 +331,7 @@ export function trainLogisticRegression(data) {
 export function predictProba(model, classType, zoneId, dwellTime, hour) {
   const feat = buildFeature(classType, zoneId, dwellTime, hour, model.maxDwell, model.simHours);
   let z = model.bias;
-  for (let j = 0; j < 14; j++) z += model.weights[j] * feat[j];
+  for (let j = 0; j < FEAT_DIM; j++) z += model.weights[j] * feat[j];
   return sigmoid(z);
 }
 
@@ -243,9 +341,9 @@ export function predictProba(model, classType, zoneId, dwellTime, hour) {
  */
 export function predictAllZones(model, classType, dwellTime, hour, activeZoneIds) {
   const ZONE_LABELS = {
-    snack: '과자/스낵', beverage: '음료', daily: '생활용품',
-    cosmetic: '화장품', stationery: '문구', frozen: '냉동식품',
-    premium: '프리미엄', bakery: '베이커리',
+    ice1: '아이스크림1', ice2: '아이스크림2', ice3: '아이스크림3',
+    ice4: '아이스크림4', ice5: '아이스크림5', ice6: '아이스크림6',
+    beverage: '음료', snack1: '과자1', snack2: '과자2',
   };
   const targetZones = activeZoneIds || ZONE_KEYS;
   return targetZones
@@ -267,9 +365,9 @@ export function runUCB1Bandit(zoneStats, trials = 500) {
   const rng = mulberry32(999);
 
   const ZONE_LABELS = {
-    snack: '과자/스낵', beverage: '음료', daily: '생활용품',
-    cosmetic: '화장품', stationery: '문구', frozen: '냉동식품',
-    premium: '프리미엄', bakery: '베이커리',
+    ice1: '아이스크림1', ice2: '아이스크림2', ice3: '아이스크림3',
+    ice4: '아이스크림4', ice5: '아이스크림5', ice6: '아이스크림6',
+    beverage: '음료', snack1: '과자1', snack2: '과자2',
   };
 
   // 각 arm의 실제 전환율 계산 — 활성 구역(방문자 > 0)만 포함
@@ -395,9 +493,9 @@ export function runUCB1Bandit(zoneStats, trials = 500) {
  */
 export function trainRevenuePredictor(data) {
   const ZONE_LABELS = {
-    snack: '과자/스낵', beverage: '음료', daily: '생활용품',
-    cosmetic: '화장품', stationery: '문구', frozen: '냉동식품',
-    premium: '프리미엄', bakery: '베이커리',
+    ice1: '아이스크림1', ice2: '아이스크림2', ice3: '아이스크림3',
+    ice4: '아이스크림4', ice5: '아이스크림5', ice6: '아이스크림6',
+    beverage: '음료', snack1: '과자1', snack2: '과자2',
   };
   const rng = mulberry32(55);
   const { purchases } = data;
@@ -418,29 +516,28 @@ export function trainRevenuePredictor(data) {
     samples = samples.slice(0, 3000);
   }
 
-  let maxDwell = 0, maxPrice = 0;
+  let maxDwell = 0;
   for (const s of samples) {
     if (s.dwellTime > maxDwell) maxDwell = s.dwellTime;
-    if (s.price > maxPrice) maxPrice = s.price;
   }
   if (maxDwell === 0) maxDwell = 10;
-  if (maxPrice === 0) maxPrice = 1;
 
   const N = samples.length;
-  const D = 14;
+  const D = FEAT_DIM;
   const X = new Float64Array(N * D);
   const y = new Float64Array(N);
   for (let i = 0; i < N; i++) {
     const feat = buildFeature(samples[i].classType, samples[i].zoneId, samples[i].dwellTime, samples[i].hour, maxDwell, simHours);
     X.set(feat, i * D);
-    y[i] = samples[i].price / maxPrice; // 정규화
+    // 예측 대상: 구역 평균가격(안정적 신호) — 개별 아이템 가격(노이즈)이 아닌 구역 수준 타깃
+    y[i] = (ZONE_AVG_PRICES[samples[i].zoneId] || samples[i].price) / MAX_ZONE_AVG;
   }
 
-  // Mini-batch GD
+  // Mini-batch GD (epochs 증가로 수렴 개선)
   const w = new Float64Array(D);
   for (let i = 0; i < D; i++) w[i] = (rng() - 0.5) * 0.01;
   let b = 0;
-  const lr = 0.05, epochs = 150, batchSize = 64, lambda = 0.001;
+  const lr = 0.05, epochs = 250, batchSize = 64, lambda = 0.001;
   const indices = Array.from({ length: N }, (_, i) => i);
 
   for (let epoch = 0; epoch < epochs; epoch++) {
@@ -480,7 +577,7 @@ export function trainRevenuePredictor(data) {
     const feat = buildFeature(classType, zoneId, dwellTime, hour, maxDwell, simHours);
     let pred = b;
     for (let j = 0; j < D; j++) pred += w[j] * feat[j];
-    return Math.max(0, pred * maxPrice);
+    return Math.max(0, pred * MAX_ZONE_AVG);
   }
 
   function predictForZone(classType, dwellTime, hour, activeZoneIds) {
@@ -495,7 +592,7 @@ export function trainRevenuePredictor(data) {
       .sort((a, b) => b.expectedRevenue - a.expectedRevenue);
   }
 
-  return { weights: w, bias: b, maxDwell, maxPrice, simHours, r2, predictForZone };
+  return { weights: w, bias: b, maxDwell, maxPrice: MAX_ZONE_AVG, simHours, r2, predictForZone };
 }
 
 // ── 시간대별 방문자·매출 수요 예측 ──────────────────────────────────────────
@@ -585,9 +682,9 @@ const CUSTOMER_CLASSES_FULL = {
  */
 export function computeCustomerValueAnalysis(data) {
   const ZONE_LABELS = {
-    snack: '과자/스낵', beverage: '음료', daily: '생활용품',
-    cosmetic: '화장품', stationery: '문구', frozen: '냉동식품',
-    premium: '프리미엄', bakery: '베이커리',
+    ice1: '아이스크림1', ice2: '아이스크림2', ice3: '아이스크림3',
+    ice4: '아이스크림4', ice5: '아이스크림5', ice6: '아이스크림6',
+    beverage: '음료', snack1: '과자1', snack2: '과자2',
   };
   const { purchases, classStats, totalVisitors, totalBuyers } = data;
   const simHours = data.operatingHours || 8;
@@ -691,9 +788,9 @@ export function computeCustomerValueAnalysis(data) {
  */
 export function predictCrossSell(data) {
   const ZONE_LABELS = {
-    snack: '과자/스낵', beverage: '음료', daily: '생활용품',
-    cosmetic: '화장품', stationery: '문구', frozen: '냉동식품',
-    premium: '프리미엄', bakery: '베이커리',
+    ice1: '아이스크림1', ice2: '아이스크림2', ice3: '아이스크림3',
+    ice4: '아이스크림4', ice5: '아이스크림5', ice6: '아이스크림6',
+    beverage: '음료', snack1: '과자1', snack2: '과자2',
   };
   const { purchases, zoneStats } = data;
 

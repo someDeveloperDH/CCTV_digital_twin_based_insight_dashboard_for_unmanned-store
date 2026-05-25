@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface rounded-2xl border border-border/60;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 28px -16px rgba(16, 24, 40, 0.10);
+  }
+  .stat-card {
+    @apply card p-5 flex flex-col gap-1;
+  }
+  .btn-primary {
+    @apply bg-accent text-white text-sm font-medium px-3 py-1.5 rounded-xl
+           hover:bg-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply text-text-muted text-sm px-3 py-1.5 rounded-xl
+           hover:bg-gray-100 transition-colors;
+  }
+  .tab-item {
+    @apply px-4 py-2 text-sm font-medium rounded-xl transition-colors cursor-pointer;
+  }
+  .tab-item.active {
+    @apply bg-accent-light text-accent;
+  }
+  .tab-item:not(.active) {
+    @apply text-text-muted hover:text-text hover:bg-gray-100;
+  }
+  .section-title {
+    @apply text-xs font-semibold uppercase tracking-wider text-text-muted mb-2;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full;
+  }
+  /* KPI 아이콘 칩 (퍼플 그라데이션 칩) */
+  .kpi-icon {
+    @apply w-10 h-10 rounded-xl text-accent flex items-center justify-center shrink-0;
+    background: linear-gradient(135deg, #efedfd, #d9d2fb);
+  }
+  /* 증감 % 뱃지 */
+  .badge-up {
+    @apply inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full
+           bg-emerald-50 text-emerald-600;
+  }
+  .badge-down {
+    @apply inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full
+           bg-rose-50 text-rose-600;
+  }
+
+  /* 데이터 표 — 퍼플 그라데이션 헤더 */
+  .data-table { @apply w-full border-collapse text-xs; }
+  .data-table thead tr {
+    background: linear-gradient(135deg, #8b7bf0, #a78bfa);
+  }
+  .data-table thead th {
+    @apply text-white font-semibold px-2 py-1.5 text-left;
+  }
+  .data-table thead th:not(:first-child) { @apply text-center; }
+  .data-table tbody tr:nth-child(even) { background: #faf9fe; }
+  .data-table tbody td { @apply px-2 py-1.5 text-center; }
+  .data-table tbody td:first-child { @apply text-left; }
+  .data-table .col-ours  { @apply text-accent font-bold; }
+  .data-table .col-base  { color: #9ca3af; }
+
+  /* 사이드바 활성 항목 그라데이션 */
+  .nav-active {
+    background: linear-gradient(90deg, #efedfd, rgba(239,237,253,0.35));
+    @apply text-accent border border-accent/30;
+  }
+}

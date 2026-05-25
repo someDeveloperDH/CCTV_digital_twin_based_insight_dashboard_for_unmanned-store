@@ -1,10 +1,34 @@
-import React, { useMemo, useRef, useEffect, useState } from 'react';
+import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
+import metricsIcecream    from './model-showcase/data/metrics_icecream.json';
+import metricsConvenience from './model-showcase/data/metrics_convenience.json';
+import metricsSupermarket from './model-showcase/data/metrics_supermarket.json';
+
+const STORE_METRICS = {
+  icecream:    metricsIcecream,
+  convenience: metricsConvenience,
+  supermarket: metricsSupermarket,
+};
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, ReferenceLine, ReferenceArea,
   XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, ScatterChart, Scatter, ZAxis,
 } from 'recharts';
 import { trainLogisticRegression, predictAllZones, runUCB1Bandit, trainRevenuePredictor, predictHourlyDemand, computeCustomerValueAnalysis, predictCrossSell } from './predictionModels.js';
-import { runFullValidation } from './validationUtils.js';
+import AIPredictionPanel from './components/AIPredictionPanel.jsx';
+import { runFullValidation, runLSTMValidation } from './validationUtils.js';
+
+// ── 소프트 퍼플·핑크 팔레트 ─────────────────────────────────────────────────
+const SOFT_RAMP = ['#a78bfa','#9277ee','#8b7bf0','#b794f6','#c8a8ee','#dcb6e6','#f0abfc'];
+const softAt = (i) => SOFT_RAMP[i % SOFT_RAMP.length];
+const OURS    = '#8b7bf0';   // 우리/예측/Test
+const BASE    = '#cbd5e1';   // 기준/실제/Train (회색)
+const WEEKEND = '#f0abfc';   // 주말 강조 (연핑크)
+
+const CLASS_PURPLE = {
+  adult_male:   '#7c6df0',
+  adult_female: '#a78bfa',
+  minor_male:   '#c4a3ec',
+  minor_female: '#f0abfc',
+};
 
 // ── 상수 ────────────────────────────────────────────────────────────────────
 
@@ -31,9 +55,11 @@ function viridisColor(t) {
 }
 
 const TOOLTIP_STYLE = {
-  contentStyle: { background: '#161628', border: '1px solid #2a2a5a', color: '#e0e0ff', fontSize: '11px' },
+  contentStyle: { background: '#fff', border: '1px solid #e5e7eb', color: '#1f2937', fontSize: '11px', borderRadius: '6px' },
+  itemStyle:    { color: '#374151' },
+  labelStyle:   { color: '#6b7280', fontWeight: 'bold', marginBottom: '2px' },
 };
-const TICK_STYLE = { fill: '#7070aa', fontSize: 10 };
+const TICK_STYLE = { fill: '#6b7280', fontSize: 10 };
 
 // ── KPI 계산 ────────────────────────────────────────────────────────────────
 
@@ -124,156 +150,86 @@ function computeKPIs(data) {
   const bestZone  = [...zoneKPIs].sort((a, b) => b.efficiency - a.efficiency)[0];
   const worstZone = [...zoneKPIs].sort((a, b) => b.inefficiency - a.inefficiency)[0];
 
-  // 인사이트 자동 생성
+  // ── 핵심 인사이트 5개 (무분별한 나열 방지, 가장 중요한 것만 선정) ──────────
   const insights = [];
   const totalRevenue = data.purchases.reduce((s, p) => s + p.price, 0);
 
-  // ── 매출/수익 분석 ──────────────────────────────────────────────────────────
-
-  // 일평균 매출 & 건당 평균 매출액
-  const dailyAvgRevenue = days > 0 ? Math.round(totalRevenue / days) : 0;
-  const avgBasketAll = totalBuyers > 0 ? Math.round(totalRevenue / totalBuyers) : 0;
-  if (dailyAvgRevenue > 0)
-    insights.push(`일평균 매출 ₩${dailyAvgRevenue.toLocaleString()}, 건당 평균 객단가 ₩${avgBasketAll.toLocaleString()} — 객단가 향상을 위해 세트 상품 및 번들 프로모션 검토 권장`);
-
-  // 매출 상위 2개 매대 집중도
-  const revSortedZones = [...zoneKPIs].sort((a, b) => b.revenue - a.revenue);
-  if (revSortedZones.length >= 2 && totalRevenue > 0) {
-    const top2Rev = revSortedZones[0].revenue + revSortedZones[1].revenue;
-    const top2Share = ((top2Rev / totalRevenue) * 100).toFixed(0);
-    insights.push(`상위 2개 구역 ("${revSortedZones[0].label}", "${revSortedZones[1].label}")이 전체 매출의 ${top2Share}% 집중 — 해당 구역 재고 부족 리스크 관리 및 인접 구역 교차 진열 검토`);
+  // [1] 비효율 구역: 방문은 많지만 전환율이 전체 평균의 60% 미만인 구역
+  //     → 레이아웃·진열 개선이 가장 직접적인 매출 레버
+  const sortedByIneff = [...zoneKPIs]
+    .filter(z => z.visitors >= 5 && z.convRate < overallConvRate * 0.6)
+    .sort((a, b) => b.visitors - a.visitors);
+  if (sortedByIneff.length > 0) {
+    const z = sortedByIneff[0];
+    insights.push(`🔴 비효율 구역 "${z.label}": 방문 ${z.visitors}회 대비 전환율 ${(z.convRate * 100).toFixed(1)}% (전체 평균 ${(overallConvRate * 100).toFixed(1)}%의 절반 수준) — 진열 위치·가격 가시성·상품 구성 재검토 우선 권장`);
+  } else if (worstZone && worstZone.avgDwell > 1.5) {
+    insights.push(`🔴 비효율 구역 "${worstZone.label}": 평균 체류 ${worstZone.avgDwell.toFixed(1)}초 대비 전환율 ${(worstZone.convRate * 100).toFixed(1)}% — 가격 태그 가독성 또는 구역 위치 개선 검토`);
   }
 
-  // 고객군별 객단가 최고 vs 최저 비교
-  const clsByBasket = [...classKPIs].filter(c => c.buyers > 0).sort((a, b) => b.avgBasket - a.avgBasket);
-  if (clsByBasket.length >= 2) {
-    const vip = clsByBasket[0];
-    const low = clsByBasket[clsByBasket.length - 1];
-    const diff = ((vip.avgBasket / (low.avgBasket || 1) - 1) * 100).toFixed(0);
-    insights.push(`${vip.label} 객단가(₩${vip.avgBasket.toLocaleString()})가 ${low.label}(₩${low.avgBasket.toLocaleString()}) 대비 ${diff}% 높음 — ${vip.label} 타겟 고가 상품 비중 확대 권장`);
-  }
-
-  // 매출 트렌드: 후반부 vs 전반부 성장률
-  const half = Math.floor(days / 2);
-  if (half >= 3) {
-    const firstHalfRevs = dailyStats.slice(0, half).map(d => d.revenue);
-    const secondHalfRevs = dailyStats.slice(half).map(d => d.revenue);
-    const avgFirst = firstHalfRevs.reduce((s, v) => s + v, 0) / (firstHalfRevs.length || 1);
-    const avgSecond = secondHalfRevs.reduce((s, v) => s + v, 0) / (secondHalfRevs.length || 1);
-    const growthRate = avgFirst > 0 ? ((avgSecond / avgFirst - 1) * 100).toFixed(1) : null;
-    if (growthRate !== null && Math.abs(Number(growthRate)) >= 5)
-      insights.push(`후반부 일평균 매출이 전반부 대비 ${growthRate > 0 ? '+' : ''}${growthRate}% — ${Number(growthRate) > 0 ? '상승 추세 유지를 위한 인기 상품 재고 확보 권장' : '하락 추세 감지, 프로모션 또는 진열 변경 시급'}`);
-  }
-
-  // 다음 달 예측 매출
-  if (nextMonthForecast > 0)
-    insights.push(`다음 달 예측 매출 ₩${nextMonthForecast.toLocaleString()} (최근 7일 추세 기준) — 예측치 대비 실적 편차를 주간 단위로 모니터링 권장`);
-
-  // ── 구역 최적화 ──────────────────────────────────────────────────────────────
-
-  // 구매전환율 최고 vs 최저 구역 비교
-  const convSortedZones = [...zoneKPIs].filter(z => z.visitors > 0).sort((a, b) => b.convRate - a.convRate);
-  if (convSortedZones.length >= 2) {
-    const topConv = convSortedZones[0];
-    const botConv = convSortedZones[convSortedZones.length - 1];
-    insights.push(`구매전환율 최고 구역 "${topConv.label}" (${(topConv.convRate * 100).toFixed(1)}%) vs 최저 "${botConv.label}" (${(botConv.convRate * 100).toFixed(1)}%) — "${botConv.label}" 진열 방식을 "${topConv.label}" 기준으로 재설계 검토`);
-  }
-
-  // 체류 대비 전환 비효율 구역 개선안
-  if (worstZone && worstZone.avgDwell > 1.5)
-    insights.push(`"${worstZone.label}" 평균 체류 ${worstZone.avgDwell.toFixed(1)}초 대비 전환율 낮음 (비효율 지수 ${(worstZone.inefficiency * 100).toFixed(0)}) — 가격 태그 가독성 개선, 시선 유도 POP 광고 또는 구역 위치 변경 검토`);
-
-  // 신상품 배치 최적 구역
-  const topNewProductZones = [...zoneKPIs].sort((a, b) => b.newProductScore - a.newProductScore).slice(0, 3);
-  if (topNewProductZones.length > 0)
-    insights.push(`신상품 배치 최적 구역: ${topNewProductZones.map(z => `"${z.label}"`).join(' > ')} (유입률 x 전환율 종합 점수 기준) — 신규 입고 상품 우선 배치 및 시범 판매 권장`);
-
-  // 구역 간 시너지: 같은 고객이 연속 방문한 구역 조합
-  const zonePairCount = {};
+  // [2] 교차구매 기회: 동일 고객이 함께 가장 많이 구매한 구역 쌍
+  //     → 인접 배치 또는 번들 기획으로 즉시 객단가 향상 가능
   const agentZoneMap = {};
   data.purchases.forEach(p => {
     if (!agentZoneMap[p.agentId]) agentZoneMap[p.agentId] = [];
     if (!agentZoneMap[p.agentId].includes(p.zoneId)) agentZoneMap[p.agentId].push(p.zoneId);
   });
+  const zonePairCount = {};
   Object.values(agentZoneMap).forEach(zones => {
-    for (let i = 0; i < zones.length - 1; i++) {
-      const key = [zones[i], zones[i + 1]].sort().join('|');
-      zonePairCount[key] = (zonePairCount[key] || 0) + 1;
-    }
+    for (let i = 0; i < zones.length; i++)
+      for (let j = i + 1; j < zones.length; j++) {
+        const key = [zones[i], zones[j]].sort().join('|');
+        zonePairCount[key] = (zonePairCount[key] || 0) + 1;
+      }
   });
-  const topPair = Object.entries(zonePairCount).sort((a, b) => b[1] - a[1])[0];
-  if (topPair && topPair[1] >= 3) {
-    const [zA, zB] = topPair[0].split('|');
-    const labelA = zoneKPIs.find(z => z.id === zA)?.label || zA;
-    const labelB = zoneKPIs.find(z => z.id === zB)?.label || zB;
-    insights.push(`"${labelA}" + "${labelB}" 구역이 동일 고객에게 가장 많이 함께 방문됨 (${topPair[1]}건) — 두 구역 인접 배치 또는 세트 할인 프로모션으로 객단가 향상 가능`);
+  const topCrossPair = Object.entries(zonePairCount).sort((a, b) => b[1] - a[1])[0];
+  if (topCrossPair && topCrossPair[1] >= 3) {
+    const [zA, zB] = topCrossPair[0].split('|');
+    const la = zoneKPIs.find(z => z.id === zA)?.label || zA;
+    const lb = zoneKPIs.find(z => z.id === zB)?.label || zB;
+    const totalBuyersForPair = Object.keys(agentZoneMap).length;
+    const crossPct = totalBuyersForPair > 0 ? ((topCrossPair[1] / totalBuyersForPair) * 100).toFixed(0) : 0;
+    insights.push(`🔗 교차구매 기회: "${la}" + "${lb}" 동시 구매 ${topCrossPair[1]}건 (구매 고객의 ${crossPct}%) — 두 구역 인접 배치 또는 세트 묶음 할인으로 객단가 향상 효과 기대`);
   }
 
-  // ── 시간/요일 패턴 ──────────────────────────────────────────────────────────
+  // [3] VIP 고객군 전략: 객단가 최고 고객군의 선호 구역 우선 관리
+  //     → 매출의 대부분을 차지하는 핵심 고객층 집중 대응
+  const vipCls = [...classKPIs].filter(c => c.buyers > 0).sort((a, b) => b.avgBasket - a.avgBasket)[0];
+  if (vipCls && totalRevenue > 0) {
+    const vipRevShare = ((classKPIs.find(c => c.cls === vipCls.cls)?.revenue || 0) / totalRevenue * 100).toFixed(0);
+    insights.push(`👑 VIP 고객군 "${vipCls.label}": 객단가 ₩${vipCls.avgBasket.toLocaleString()}, 전체 매출의 ${vipRevShare}% 점유 — 해당 고객 선호 구역 재고 우선 보충·프리미엄 상품 진열 강화 권장`);
+  }
 
-  // 주말 vs 평일 매출 차이
-  const weekendAvg = (dowAgg[5].avgRevenue + dowAgg[6].avgRevenue) / 2;
-  const weekdayAvg = dowAgg.slice(0, 5).reduce((s, d) => s + d.avgRevenue, 0) / 5 || 1;
-  if (weekendAvg > weekdayAvg * 1.1)
-    insights.push(`주말 일평균 매출(₩${Math.round(weekendAvg).toLocaleString()})이 평일(₩${Math.round(weekdayAvg).toLocaleString()}) 대비 ${((weekendAvg / weekdayAvg - 1) * 100).toFixed(0)}% 높음 — 주말 추가 인력 배치 및 주말 한정 프로모션 강화 권장`);
-  else if (weekendAvg < weekdayAvg * 0.9)
-    insights.push(`주말 일평균 매출(₩${Math.round(weekendAvg).toLocaleString()})이 평일(₩${Math.round(weekdayAvg).toLocaleString()}) 대비 ${((1 - weekendAvg / weekdayAvg) * 100).toFixed(0)}% 낮음 — 주말 집객 이벤트 또는 SNS 프로모션 검토 권장`);
-
-  // 피크 시간대 vs 비피크 매출 격차
+  // [4] 피크 시간대 재고 관리: 매출 최고 시간대 vs 최저 시간대 격차
+  //     → 피크 전 재고 보충·모니터링 타이밍 설정 근거
   const hourRevSorted = [...hourlyAgg].sort((a, b) => b.revenue - a.revenue);
-  if (hourRevSorted.length >= 2) {
+  if (hourRevSorted.length >= 2 && hourRevSorted[hourRevSorted.length - 1].revenue > 0) {
     const peak = hourRevSorted[0];
     const offPeak = hourRevSorted[hourRevSorted.length - 1];
-    if (offPeak.revenue > 0) {
-      const peakRatio = (peak.revenue / offPeak.revenue).toFixed(1);
-      insights.push(`피크 시간대 ${peak.label} 매출이 최저 시간대 ${offPeak.label} 대비 ${peakRatio}배 — 비피크 시간대 할인 행사 또는 시간대 맞춤 진열 교체로 매출 평탄화 가능`);
-    }
+    const ratio = (peak.revenue / offPeak.revenue).toFixed(1);
+    insights.push(`⏰ 피크 시간대 "${peak.label}" 매출이 최저 "${offPeak.label}" 대비 ${ratio}배 — 피크 전 재고 보충 스케줄링 및 비피크 시간대 할인 행사로 매출 평탄화 가능`);
+  } else if (bestHours.length > 0) {
+    insights.push(`⏰ 매출 집중 시간대: ${bestHours.join(', ')} — 해당 시간대 재고 부족 방지 및 키오스크 정상 작동 점검 우선 권장`);
   }
 
-  // 요일별 전환율 최고 요일
-  const dowConv = dowAgg.map((d, i) => {
-    const daysOfType = dailyStats.filter(s => s.dayOfWeek === i);
-    const sumBuyers = daysOfType.reduce((s, x) => s + x.buyers, 0);
-    const sumVisitors = daysOfType.reduce((s, x) => s + x.visitors, 0);
-    return { label: DOW_LABELS[i], convRate: sumVisitors > 0 ? sumBuyers / sumVisitors : 0 };
-  });
-  const bestDow = [...dowConv].filter(d => d.convRate > 0).sort((a, b) => b.convRate - a.convRate)[0];
-  if (bestDow)
-    insights.push(`요일별 전환율 최고 요일은 ${bestDow.label}요일 (${(bestDow.convRate * 100).toFixed(1)}%) — 해당 요일 한정 특가 또는 타임딜 운영으로 구매 전환 극대화 권장`);
-
-  // ── 고객 행동 ────────────────────────────────────────────────────────────────
-
-  // 성년 vs 미성년 구매 패턴 비교
-  const adultCls = classKPIs.filter(c => c.cls.startsWith('adult'));
-  const minorCls = classKPIs.filter(c => c.cls.startsWith('minor'));
-  const adultAvgBasket = adultCls.reduce((s, c) => s + c.avgBasket, 0) / (adultCls.length || 1);
-  const minorAvgBasket = minorCls.reduce((s, c) => s + c.avgBasket, 0) / (minorCls.length || 1);
-  const adultConv = adultCls.reduce((s, c) => s + c.buyers, 0) / (adultCls.reduce((s, c) => s + c.visitors, 0) || 1);
-  const minorConv = minorCls.reduce((s, c) => s + c.buyers, 0) / (minorCls.reduce((s, c) => s + c.visitors, 0) || 1);
-  if (adultAvgBasket > 0 && minorAvgBasket > 0)
-    insights.push(`성년 객단가(₩${Math.round(adultAvgBasket).toLocaleString()})가 미성년(₩${Math.round(minorAvgBasket).toLocaleString()}) 대비 ${((adultAvgBasket / minorAvgBasket - 1) * 100).toFixed(0)}% 높고, 전환율은 성년 ${(adultConv * 100).toFixed(1)}% vs 미성년 ${(minorConv * 100).toFixed(1)}% — 성년 타겟 프리미엄 라인업 강화 병행 권장`);
-
-  // 전환율 최고 고객군
-  const topConvCls = [...classKPIs].filter(c => c.visitors > 0).sort((a, b) => b.convRate - a.convRate)[0];
-  if (topConvCls)
-    insights.push(`전환율 최고 고객군은 ${topConvCls.label} (${(topConvCls.convRate * 100).toFixed(1)}%) — 해당 고객군 선호 구역의 재고 충분도 및 진열 품질 우선 관리 권장`);
-
-  // VIP 고객군 (객단가 최고)
-  const vipCls = [...classKPIs].filter(c => c.buyers > 0).sort((a, b) => b.avgBasket - a.avgBasket)[0];
-  if (vipCls)
-    insights.push(`VIP 고객군 ${vipCls.label}: 평균 객단가 ₩${vipCls.avgBasket.toLocaleString()}, 구매 건수 ${vipCls.buyers}건 — 멤버십 혜택 또는 개인화 쿠폰 제공으로 재방문율 향상 권장`);
-
-  // ── 전략 제안 ────────────────────────────────────────────────────────────────
-
-  // 인력 배치 최적 시간대
-  if (bestHours.length > 0)
-    insights.push(`매출 집중 시간대: ${bestHours.join(', ')} — 해당 시간대 계산대 추가 개방 및 매장 담당 인력 집중 배치로 병목 최소화 권장`);
-
-  // 종합 수익 개선 전략
-  const lowConvZoneCount = zoneKPIs.filter(z => z.visitors > 0 && z.convRate < overallConvRate * 0.7).length;
-  const highDwellLowConv = zoneKPIs.filter(z => z.avgDwell > 3 && z.convRate < overallConvRate * 0.8).length;
-  if (lowConvZoneCount > 0 || highDwellLowConv > 0)
-    insights.push(`전체 전환율(${(overallConvRate * 100).toFixed(1)}%) 대비 저성과 구역 ${lowConvZoneCount}개, 고체류-저전환 구역 ${highDwellLowConv}개 감지 — 진열 레이아웃 재구성, 가격 경쟁력 점검, 고객 동선 유도 사이니지 보강을 통한 전환율 개선 우선 추진 권장`);
+  // [5] 매출 추세: 4개월 전반부 vs 후반부 성장률
+  //     → 상품 기획 방향 결정 (확대 or 프로모션 필요)
+  const half = Math.floor(days / 2);
+  if (half >= 7 && totalRevenue > 0) {
+    const avgFirst  = dailyStats.slice(0, half).reduce((s, d) => s + d.revenue, 0) / half;
+    const avgSecond = dailyStats.slice(half).reduce((s, d) => s + d.revenue, 0) / (days - half);
+    const growthPct = avgFirst > 0 ? ((avgSecond / avgFirst - 1) * 100).toFixed(1) : null;
+    if (growthPct !== null) {
+      const arrow = Number(growthPct) >= 5 ? '📈' : Number(growthPct) <= -5 ? '📉' : '➡️';
+      insights.push(`${arrow} 매출 추세: 후반부 일평균이 전반부 대비 ${Number(growthPct) >= 0 ? '+' : ''}${growthPct}% — ${Number(growthPct) > 5 ? '성장 유지 위해 인기 구역 재고 확보 강화' : Number(growthPct) < -5 ? '하락 감지, 비효율 구역 정비 및 프로모션 시급' : '안정적 매출 유지 중, 신상품 도입으로 성장 모멘텀 확보 검토'}`);
+    }
+  } else {
+    const revSortedZones = [...zoneKPIs].sort((a, b) => b.revenue - a.revenue);
+    if (revSortedZones.length >= 2 && totalRevenue > 0) {
+      const top2Rev   = revSortedZones[0].revenue + revSortedZones[1].revenue;
+      const top2Share = ((top2Rev / totalRevenue) * 100).toFixed(0);
+      insights.push(`📦 매출 집중도: 상위 2개 구역 ("${revSortedZones[0].label}", "${revSortedZones[1].label}")이 전체의 ${top2Share}% 점유 — 해당 구역 품절 리스크 집중 관리 필요`);
+    }
+  }
 
   return {
     overallConvRate, zoneKPIs, classKPIs, hourlyAgg, dowAgg,
@@ -292,7 +248,7 @@ function HeatmapMini({ heatGrids, classType, width = 200, height = 150 }) {
     if (!canvas || !heatGrids) return;
     const ctx  = canvas.getContext('2d');
     const HEAT_W = 200, HEAT_H = 150;
-    ctx.fillStyle = '#0f0f1e';
+    ctx.fillStyle = '#f3f4f6';
     ctx.fillRect(0, 0, HEAT_W, HEAT_H);
 
     let grid;
@@ -336,21 +292,20 @@ function HeatmapMini({ heatGrids, classType, width = 200, height = 150 }) {
 
 function Section({ title, children }) {
   return (
-    <div style={{ background: '#161628', border: '1px solid #222244', borderRadius: '6px', padding: '12px' }}>
-      <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#7070b0', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
-        {title}
-      </div>
+    <div className="card p-4">
+      <p className="section-title">{title.replace(/^[^\s]*\s/, '')}</p>
       {children}
     </div>
   );
 }
 
-function KpiCard({ label, value, sub, color = '#7090ff' }) {
+function KpiCard({ label, value, sub, color = '#6d5ce7' }) {
   return (
-    <div style={{ background: '#0e0e22', borderRadius: '5px', padding: '10px 12px', border: '1px solid #1e1e44' }}>
-      <div style={{ fontSize: '10px', color: '#6060aa', marginBottom: '3px' }}>{label}</div>
-      <div style={{ fontSize: '18px', fontWeight: 'bold', color }}>{value}</div>
-      {sub && <div style={{ fontSize: '10px', color: '#5050aa', marginTop: '2px' }}>{sub}</div>}
+    <div className="bg-surface rounded-xl p-3 border border-border/60"
+      style={{ boxShadow: '0 1px 2px rgba(16,24,40,0.04)' }}>
+      <div className="text-xs text-text-muted mb-1">{label}</div>
+      <div className="text-lg font-bold" style={{ color }}>{value}</div>
+      {sub && <div className="text-xs text-text-muted mt-0.5">{sub}</div>}
     </div>
   );
 }
@@ -370,12 +325,14 @@ function dlCSV(filename, content) {
   URL.revokeObjectURL(url);
 }
 
-function ValidationCard({ label, metric, value, color }) {
+function ValidationCard({ label, metric, value, color, sub }) {
   return (
-    <div style={{ background: '#0e0e22', borderRadius: '5px', padding: '10px', border: '1px solid #1e1e44', textAlign: 'center' }}>
-      <div style={{ fontSize: '9px', color: '#5050aa', marginBottom: '3px' }}>{label}</div>
-      <div style={{ fontSize: '20px', fontWeight: 'bold', color }}>{value}</div>
-      <div style={{ fontSize: '9px', color: '#6060aa', marginTop: '2px' }}>{metric}</div>
+    <div className="bg-surface rounded-xl p-3 border border-border/60 text-center"
+      style={{ boxShadow: '0 1px 2px rgba(16,24,40,0.04)' }}>
+      <div className="text-xs text-text-muted mb-1">{label}</div>
+      <div className="text-xl font-bold" style={{ color }}>{value}</div>
+      <div className="text-xs text-text-muted mt-1">{metric}</div>
+      {sub && <div className="text-xs text-text-muted mt-0.5">{sub}</div>}
     </div>
   );
 }
@@ -383,16 +340,16 @@ function ValidationCard({ label, metric, value, color }) {
 function ConfCell({ value, label, color }) {
   return (
     <div style={{ background: color, borderRadius: '4px', padding: '8px', textAlign: 'center' }}>
-      <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#e0e0ff' }}>{value.toLocaleString()}</div>
-      <div style={{ fontSize: '9px', color: '#7070aa' }}>{label}</div>
+      <div className="text-base font-bold text-white">{value.toLocaleString()}</div>
+      <div className="text-xs text-white/70">{label}</div>
     </div>
   );
 }
 
 // ── 메인 컴포넌트 ────────────────────────────────────────────────────────────
 
-export default function BatchAnalytics({ data }) {
-  const [subTab, setSubTab] = useState('kpi'); // 'kpi' | 'ai' | 'validation'
+export default function BatchAnalytics({ data, view = 'data' }) {
+  const metrics = STORE_METRICS[data?.storeType] ?? metricsIcecream;
   const totalDays = data.dailyStats?.length || 120;
 
   const kpis = useMemo(() => computeKPIs(data), [data]);
@@ -402,10 +359,29 @@ export default function BatchAnalytics({ data }) {
   } = kpis;
 
   // ── 모델 검증 (4개월 → 3/1 분할) ──
-  const validationResults = useMemo(() => {
-    if (totalDays < 60) return null; // 최소 60일 이상이어야 검증 의미 있음
-    return runFullValidation(data);
-  }, [data, totalDays]);
+  const [validationResults, setValidationResults] = useState(null);
+  const [validationLoading, setValidationLoading] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    setValidationResults(null);
+    if (view !== 'validation' || totalDays < 60) {
+      setValidationLoading(false);
+      return;
+    }
+    setValidationLoading(true);
+    const timer = setTimeout(() => {
+      try {
+        const result = runFullValidation(data);
+        if (!cancelled) setValidationResults(result);
+      } finally {
+        if (!cancelled) setValidationLoading(false);
+      }
+    }, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [data, totalDays, view]);
 
   // ── AI 예측 모델 state ──
   // 활성 구역: zoneStats에 실제 데이터가 있는 구역만 (매장 유형에 따라 다름)
@@ -420,12 +396,91 @@ export default function BatchAnalytics({ data }) {
   const [lrDwellTime, setLrDwellTime] = useState(4.0);
   const [lrHour, setLrHour]           = useState(2);
 
-  const lrModel = useMemo(() => trainLogisticRegression(data), [data]);
+  const lrModel = useMemo(() => trainLogisticRegression({ ...data, activeZones: activeZoneIds }, data.storeType), [data, activeZoneIds]);
   const lrPredictions = useMemo(
     () => predictAllZones(lrModel, lrClassType, lrDwellTime, lrHour, activeZoneIds),
     [lrModel, lrClassType, lrDwellTime, lrHour, activeZoneIds]
   );
   const banditResult = useMemo(() => runUCB1Bandit(data.zoneStats, 500), [data.zoneStats]);
+
+  // ── LSTM / DQN 딥러닝 모델 state ──
+  const [lstmResult,   setLstmResult]   = useState(null);
+  const [dqnResult,    setDqnResult]    = useState(null);
+  const [lstmLoading,  setLstmLoading]  = useState(false);
+  const [dqnLoading,   setDqnLoading]   = useState(false);
+  const [lstmProgress, setLstmProgress] = useState(0);
+  const [dqnProgress,  setDqnProgress]  = useState(0);
+  const [aiError,      setAiError]      = useState(null);
+
+  // LSTM 검증 결과 (validation 탭)
+  const [lstmValidation, setLstmValidation] = useState(null);
+  const [lstmValLoading, setLstmValLoading] = useState(false);
+  const [lstmValProgress, setLstmValProgress] = useState(0);
+
+  // 데이터가 바뀌면 이전 결과 리셋 (재학습이 필요한 상태로)
+  useEffect(() => {
+    setLstmResult(null);
+    setDqnResult(null);
+    setLstmValidation(null);
+    setAiError(null);
+  }, [data]);
+
+  // 학습 트리거 핸들러 — 사용자가 버튼을 눌러 명시적으로 시작
+  const trainLSTM = useCallback(async () => {
+    if (data.dailyStats?.length < 15) return;
+    setLstmLoading(true);
+    setLstmProgress(0);
+    setAiError(null);
+    try {
+      const { trainLSTMForecaster } = await import('./models/lstmForecaster.js');
+      const result = await trainLSTMForecaster(data.dailyStats, {
+        horizon: 14,
+        onProgress: p => setLstmProgress(p),
+      });
+      setLstmResult(result);
+    } catch (e) {
+      setAiError('LSTM 학습 실패: ' + (e.message || e));
+    } finally {
+      setLstmLoading(false);
+    }
+  }, [data]);
+
+  const trainDQN = useCallback(async () => {
+    if (data.dailyStats?.length < 15) return;
+    setDqnLoading(true);
+    setDqnProgress(0);
+    setAiError(null);
+    try {
+      const { trainDQNOptimizer } = await import('./models/dqnOptimizer.js');
+      const result = await trainDQNOptimizer(data, {
+        episodes: 300,
+        onProgress: p => setDqnProgress(p),
+      });
+      setDqnResult(result);
+    } catch (e) {
+      setAiError('DQN 학습 실패: ' + (e.message || e));
+    } finally {
+      setDqnLoading(false);
+    }
+  }, [data]);
+
+  const trainBothAI = useCallback(async () => {
+    await Promise.all([trainLSTM(), trainDQN()]);
+  }, [trainLSTM, trainDQN]);
+
+  const runLSTMValid = useCallback(async () => {
+    if (data.dailyStats?.length < 15) return;
+    setLstmValLoading(true);
+    setLstmValProgress(0);
+    try {
+      const r = await runLSTMValidation(data, p => setLstmValProgress(p));
+      setLstmValidation(r);
+    } catch (e) {
+      // swallow
+    } finally {
+      setLstmValLoading(false);
+    }
+  }, [data]);
 
   // ── 신규 예측 모델 ──
   const revenueModel = useMemo(() => trainRevenuePredictor(data), [data]);
@@ -480,38 +535,17 @@ export default function BatchAnalytics({ data }) {
   };
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px', background: '#0a0a18' }}>
-
-      {/* ── 서브탭 바 ── */}
-      <div style={{ display: 'flex', gap: '4px', background: '#0e0e20', borderRadius: '6px', padding: '3px', border: '1px solid #1a1a3a' }}>
-        {[
-          { id: 'kpi', label: '📊 KPI 분석', desc: `${totalDays}일 통계` },
-          { id: 'ai', label: '🤖 AI 예측', desc: '6개 모델' },
-          { id: 'validation', label: '🔬 모델 검증', desc: `${validationResults?.trainDays || 90}/${validationResults?.testDays || 30}일 분할` },
-        ].map(tab => (
-          <button key={tab.id} onClick={() => setSubTab(tab.id)}
-            style={{
-              flex: 1, padding: '8px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer',
-              background: subTab === tab.id ? '#1a2a4a' : 'transparent',
-              color: subTab === tab.id ? '#7090ff' : '#5050aa',
-              fontWeight: subTab === tab.id ? 'bold' : 'normal', fontSize: '12px',
-              transition: 'all 0.2s',
-            }}>
-            <div>{tab.label}</div>
-            <div style={{ fontSize: '9px', opacity: 0.7, marginTop: '2px' }}>{tab.desc}</div>
-          </button>
-        ))}
-      </div>
+    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 bg-bg">
 
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ── KPI 분석 탭 ── */}
+      {/* ── 데이터 분석 뷰 ── */}
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {subTab === 'kpi' && (<>
+      {view === 'data' && (<>
 
       {/* ── 1행: 요약 KPI 카드 ── */}
       <Section title={`📊 ${totalDays}일 핵심 KPI 요약`}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-          <KpiCard label="총 방문객" value={`${data.totalVisitors.toLocaleString()}명`} color="#7090ff" />
+          <KpiCard label="총 방문객" value={`${data.totalVisitors.toLocaleString()}명`} color="#a78bfa" />
           <KpiCard label="전체 구매전환율"
             value={`${(overallConvRate * 100).toFixed(1)}%`}
             color={overallConvRate > 0.6 ? '#40cc80' : overallConvRate > 0.3 ? '#ffaa44' : '#ff6060'} />
@@ -534,7 +568,7 @@ export default function BatchAnalytics({ data }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
           {['combined', ...Object.keys(CUSTOMER_CLASSES)].map(cls => (
             <div key={cls} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-              <div style={{ fontSize: '10px', color: cls === 'combined' ? '#c0c0e0' : CUSTOMER_CLASSES[cls]?.color, fontWeight: 'bold' }}>
+              <div style={{ fontSize: '10px', color: cls === 'combined' ? '#374151' : CUSTOMER_CLASSES[cls]?.color, fontWeight: 'bold' }}>
                 {cls === 'combined' ? '통합' : CUSTOMER_CLASSES[cls].short}
               </div>
               {heatGridsRestored && <HeatmapMini heatGrids={heatGridsRestored} classType={cls} width={140} height={105} />}
@@ -548,12 +582,12 @@ export default function BatchAnalytics({ data }) {
         <Section title="🏪 구역별 구매전환율 (%)">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={zoneConvData} margin={{ top: 0, right: 8, left: -10, bottom: 40 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={TICK_STYLE} angle={-30} textAnchor="end" interval={0} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => `${v}%`} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`, '구매전환율']} />
-              <Bar dataKey="전환율" fill="#5a7aff" radius={[3, 3, 0, 0]}>
-                {zoneConvData.map((_, i) => <Cell key={i} fill={`hsl(${210 + i * 18}, 70%, 55%)`} />)}
+              <Bar dataKey="전환율" radius={[6, 6, 0, 0]}>
+                {zoneConvData.map((_, i) => <Cell key={i} fill={softAt(i)} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -562,25 +596,25 @@ export default function BatchAnalytics({ data }) {
         <Section title="⏱ 구역별 평균 체류시간 vs 전환율">
           <ResponsiveContainer width="100%" height={200}>
             <ScatterChart margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="체류" name="체류시간" type="number" tick={TICK_STYLE}
-                label={{ value: '체류(초)', position: 'insideBottom', fill: '#7070aa', fontSize: 10, dy: 12 }} />
+                label={{ value: '체류(초)', position: 'insideBottom', fill: '#6b7280', fontSize: 10, dy: 12 }} />
               <YAxis dataKey="전환율" name="전환율" type="number" tick={TICK_STYLE} tickFormatter={v => `${v}%`} />
-              <ZAxis range={[60, 60]} />
+              <ZAxis range={[120, 120]} />
               <Tooltip {...TOOLTIP_STYLE}
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
                   const p = payload[0]?.payload;
                   return (
                     <div style={{ ...TOOLTIP_STYLE.contentStyle, padding: '6px 10px' }}>
-                      <div style={{ color: '#e0e0ff', fontWeight: 'bold' }}>{p?.name}</div>
+                      <div style={{ color: '#1f2937', fontWeight: 'bold' }}>{p?.name}</div>
                       <div>체류: {p?.체류}초</div>
                       <div>전환율: {p?.전환율}%</div>
                     </div>
                   );
                 }}
               />
-              <Scatter data={zoneConvData} fill="#5affaa" />
+              <Scatter data={zoneConvData} fill={OURS} fillOpacity={0.9} stroke="#6d5ce7" strokeWidth={1} />
             </ScatterChart>
           </ResponsiveContainer>
         </Section>
@@ -591,25 +625,25 @@ export default function BatchAnalytics({ data }) {
         <Section title="🕐 시간대별 구매전환율">
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={hourlyAgg} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="label" tick={TICK_STYLE} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => `${(v * 100).toFixed(0)}%`} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${(v * 100).toFixed(1)}%`, '전환율']} />
-              <Line type="monotone" dataKey="convRate" stroke="#5a7aff" strokeWidth={2} dot={{ fill: '#5a7aff', r: 3 }} />
+              <Line type="monotone" dataKey="convRate" stroke="#6d5ce7" strokeWidth={2} dot={{ fill: '#6d5ce7', r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </Section>
 
         <Section title="👥 고객군별 구매전환율">
           <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={classKPIs.map(c => ({ name: c.short, 전환율: +(c.convRate * 100).toFixed(1), color: c.color }))}
+            <BarChart data={classKPIs.map(c => ({ name: c.short, 전환율: +(c.convRate * 100).toFixed(1), cls: c.cls }))}
               margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={TICK_STYLE} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => `${v}%`} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`, '전환율']} />
-              <Bar dataKey="전환율" radius={[3, 3, 0, 0]}>
-                {classKPIs.map((c, i) => <Cell key={i} fill={c.color} />)}
+              <Bar dataKey="전환율" radius={[6, 6, 0, 0]}>
+                {classKPIs.map((c, i) => <Cell key={i} fill={CLASS_PURPLE[c.cls]} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -621,11 +655,11 @@ export default function BatchAnalytics({ data }) {
         <Section title="📈 일별 매출 추이 (30일)">
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={dailySalesChart} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="day" tick={TICK_STYLE} tickFormatter={v => `${v}일`} interval={4} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
               <Tooltip {...TOOLTIP_STYLE} formatter={(v, name) => [name === 'revenue' ? fmtWon(v) : `${v}%`, name === 'revenue' ? '매출' : '전환율']} />
-              <Line type="monotone" dataKey="revenue" stroke="#5a7aff" strokeWidth={2} dot={false} name="매출" />
+              <Line type="monotone" dataKey="revenue" stroke="#6d5ce7" strokeWidth={2} dot={false} name="매출" />
             </LineChart>
           </ResponsiveContainer>
         </Section>
@@ -633,12 +667,12 @@ export default function BatchAnalytics({ data }) {
         <Section title="📅 요일별 평균 매출">
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={dowAgg} margin={{ top: 5, right: 8, left: -10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="dow" tick={TICK_STYLE} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [fmtWon(v), '평균 매출']} />
-              <Bar dataKey="avgRevenue" radius={[3, 3, 0, 0]}>
-                {dowAgg.map((_, i) => <Cell key={i} fill={i >= 5 ? '#ff7a5a' : '#5a7aff'} />)}
+              <Bar dataKey="avgRevenue" radius={[6, 6, 0, 0]}>
+                {dowAgg.map((_, i) => <Cell key={i} fill={i >= 5 ? WEEKEND : OURS} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -648,15 +682,16 @@ export default function BatchAnalytics({ data }) {
       {/* ── 6행: 고객군별 매출 파이 + 구역별 ROI ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         <Section title="💰 고객군별 매출 비중">
-          <ResponsiveContainer width="100%" height={180}>
-            <PieChart>
-              <Pie data={classKPIs.map(c => ({ name: c.short, value: c.revenue, color: c.color }))}
-                dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={65}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          <ResponsiveContainer width="100%" height={210}>
+            <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+              <Pie data={classKPIs.map(c => ({ name: c.label, value: c.revenue, cls: c.cls }))}
+                dataKey="value" nameKey="name" cx="50%" cy="45%" outerRadius={56}
+                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
                 labelLine={false}>
-                {classKPIs.map((c, i) => <Cell key={i} fill={c.color} />)}
+                {classKPIs.map((c, i) => <Cell key={i} fill={CLASS_PURPLE[c.cls]} />)}
               </Pie>
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [fmtWon(v), '매출']} />
+              <Legend verticalAlign="bottom" height={22} iconSize={8} wrapperStyle={{ fontSize: 10, color: '#9ca3af' }} />
             </PieChart>
           </ResponsiveContainer>
         </Section>
@@ -665,11 +700,11 @@ export default function BatchAnalytics({ data }) {
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={[...zoneKPIs].sort((a, b) => b.revenue - a.revenue).map(z => ({ name: z.label, revenue: z.revenue }))}
               layout="vertical" margin={{ top: 0, right: 30, left: 40, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis type="number" tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
-              <YAxis type="category" dataKey="name" tick={{ fill: '#8080c0', fontSize: 9 }} width={52} />
+              <YAxis type="category" dataKey="name" tick={{ fill: '#6b7280', fontSize: 9 }} width={52} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [fmtWon(v), '총 매출']} />
-              <Bar dataKey="revenue" fill="#5affaa" radius={[0, 3, 3, 0]} />
+              <Bar dataKey="revenue" fill={OURS} radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Section>
@@ -679,10 +714,10 @@ export default function BatchAnalytics({ data }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         <Section title="⚠️ 비효율 구역 TOP3 (개선 우선순위)">
           {ineffTop3.map((z, i) => (
-            <div key={z.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', marginTop: '5px', background: '#1a1030', borderRadius: '4px', borderLeft: `3px solid ${i === 0 ? '#ff4444' : i === 1 ? '#ff8844' : '#ffaa44'}` }}>
+            <div key={z.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', marginTop: '5px', background: '#fff1f2', borderRadius: '4px', borderLeft: `3px solid ${i === 0 ? '#ff4444' : i === 1 ? '#ff8844' : '#ffaa44'}` }}>
               <div>
-                <div style={{ fontSize: '12px', color: '#e0e0ff', fontWeight: 'bold' }}>{i + 1}. {z.label}</div>
-                <div style={{ fontSize: '10px', color: '#7070aa', marginTop: '2px' }}>
+                <div style={{ fontSize: '12px', color: '#1f2937', fontWeight: 'bold' }}>{i + 1}. {z.label}</div>
+                <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '2px' }}>
                   체류 {z.avgDwell.toFixed(1)}초 · 전환율 {(z.convRate * 100).toFixed(1)}%
                 </div>
               </div>
@@ -693,10 +728,10 @@ export default function BatchAnalytics({ data }) {
 
         <Section title="✨ 신상품 배치 적합 구역 TOP3">
           {newProdTop3.map((z, i) => (
-            <div key={z.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', marginTop: '5px', background: '#0a1a10', borderRadius: '4px', borderLeft: `3px solid ${i === 0 ? '#40cc80' : i === 1 ? '#4aaa60' : '#4a8850'}` }}>
+            <div key={z.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', marginTop: '5px', background: '#f0fdf4', borderRadius: '4px', borderLeft: `3px solid ${i === 0 ? '#40cc80' : i === 1 ? '#4aaa60' : '#4a8850'}` }}>
               <div>
-                <div style={{ fontSize: '12px', color: '#e0e0ff', fontWeight: 'bold' }}>{i + 1}. {z.label}</div>
-                <div style={{ fontSize: '10px', color: '#7070aa', marginTop: '2px' }}>
+                <div style={{ fontSize: '12px', color: '#1f2937', fontWeight: 'bold' }}>{i + 1}. {z.label}</div>
+                <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '2px' }}>
                   유입률 {(z.entryRate * 100).toFixed(1)}% · 전환율 {(z.convRate * 100).toFixed(1)}%
                 </div>
               </div>
@@ -706,22 +741,10 @@ export default function BatchAnalytics({ data }) {
         </Section>
       </div>
 
-      {/* ── 8행: 다음달 예측 + 최적 인력 ── */}
-      <Section title="🔮 예측 지표">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-          <KpiCard label="다음달 예상 매출" value={fmtWon(nextMonthForecast)} sub="후반 7일 트렌드 기반" color="#ffcc44" />
-          <KpiCard label="최적 인력 집중 시간" value={bestHours.join(' · ')} sub="시간대별 매출 TOP3" color="#40cc80" />
-          <KpiCard label={`${totalDays}일 총 구매건수`} value={`${data.purchases.length.toLocaleString()}건`} color="#c080ff" />
-          <KpiCard label="평균 일 매출"
-            value={fmtWon(Math.round(data.dailyStats.reduce((s, d) => s + d.revenue, 0) / data.dailyStats.length))}
-            color="#7090ff" />
-        </div>
-      </Section>
-
-      {/* ── 9행: 인사이트 ── */}
+      {/* ── 8행: 인사이트 ── */}
       <Section title="💡 배치 기반 추천 인사이트">
         {insights.map((ins, i) => (
-          <div key={i} style={{ padding: '8px 10px', marginTop: '6px', background: '#161630', borderRadius: '4px', borderLeft: '3px solid #4a6aff', fontSize: '12px', lineHeight: '1.6', color: '#c0c0e0' }}>
+          <div key={i} style={{ padding: '8px 10px', marginTop: '6px', background: '#efedfd', borderRadius: '6px', borderLeft: '3px solid #6d5ce7', fontSize: '12px', lineHeight: '1.6', color: '#374151' }}>
             {ins}
           </div>
         ))}
@@ -735,9 +758,7 @@ export default function BatchAnalytics({ data }) {
             { label: '👥 고객군별 KPI CSV', fn: downloadClassCSV },
             { label: '📋 전체 구매 내역 CSV', fn: downloadPurchaseCSV },
           ].map(({ label, fn }) => (
-            <button key={label} onClick={fn} style={{ background: '#1a3a1a', color: '#e0e0ff', border: 'none', borderRadius: '4px', padding: '7px 12px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+            <button key={label} onClick={fn} className="btn-primary text-xs py-1.5 px-3">
               {label}
             </button>
           ))}
@@ -747,17 +768,19 @@ export default function BatchAnalytics({ data }) {
       </>)}
 
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ── AI 예측 탭 ── */}
+      {/* ── AI 예측 뷰 ── */}
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {subTab === 'ai' && (<>
+      {view === 'ai' && <AIPredictionPanel data={data} kpis={kpis} />}
+
+      {false && (<>
 
       {/* ── 11행: AI 예측 모델 ── */}
       <Section title="🤖 AI 예측 모델">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
 
           {/* ── 좌: Logistic Regression ── */}
-          <div style={{ background: '#0e0e22', borderRadius: '6px', padding: '12px', border: '1px solid #1e1e44' }}>
-            <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#c0c0e0', marginBottom: '10px' }}>
+          <div style={{ background: '#f9fafb', borderRadius: '6px', padding: '12px', border: '1px solid #e5e7eb', color: '#374151' }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#374151', marginBottom: '10px' }}>
               📈 구매 전환율 예측 (Logistic Regression)
             </div>
 
@@ -765,9 +788,9 @@ export default function BatchAnalytics({ data }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
               {/* 고객분류 */}
               <div>
-                <div style={{ fontSize: '10px', color: '#6060aa', marginBottom: '3px' }}>고객분류</div>
+                <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '3px' }}>고객분류</div>
                 <select value={lrClassType} onChange={e => setLrClassType(e.target.value)}
-                  style={{ width: '100%', background: '#161628', color: '#e0e0ff', border: '1px solid #2a2a5a', borderRadius: '4px', padding: '4px 6px', fontSize: '11px' }}>
+                  className="w-full bg-white border border-border rounded px-2 py-1 text-xs text-text">
                   {CLASS_KEYS.map(cls => (
                     <option key={cls} value={cls}>{CUSTOMER_CLASSES[cls].label}</option>
                   ))}
@@ -775,16 +798,16 @@ export default function BatchAnalytics({ data }) {
               </div>
               {/* 체류시간 */}
               <div>
-                <div style={{ fontSize: '10px', color: '#6060aa', marginBottom: '3px' }}>체류시간: {lrDwellTime.toFixed(1)}초</div>
+                <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '3px' }}>체류시간: {lrDwellTime.toFixed(1)}초</div>
                 <input type="range" min="0.5" max="10" step="0.5" value={lrDwellTime}
                   onChange={e => setLrDwellTime(parseFloat(e.target.value))}
-                  style={{ width: '100%', accentColor: '#7090ff' }} />
+                  className="w-full accent-accent" />
               </div>
               {/* 시간대 */}
               <div>
-                <div style={{ fontSize: '10px', color: '#6060aa', marginBottom: '3px' }}>시간대</div>
+                <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '3px' }}>시간대</div>
                 <select value={lrHour} onChange={e => setLrHour(parseInt(e.target.value))}
-                  style={{ width: '100%', background: '#161628', color: '#e0e0ff', border: '1px solid #2a2a5a', borderRadius: '4px', padding: '4px 6px', fontSize: '11px' }}>
+                  className="w-full bg-white border border-border rounded px-2 py-1 text-xs text-text">
                   {kpis.HOUR_LABELS.map((label, i) => (
                     <option key={i} value={i}>{label}</option>
                   ))}
@@ -797,51 +820,65 @@ export default function BatchAnalytics({ data }) {
               <BarChart data={lrPredictions.map(p => ({
                 name: p.label,
                 확률: +(p.probability * 100).toFixed(1),
-                fill: `hsl(${Math.round(p.probability * 120)}, 70%, 55%)`,
               }))} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a1a3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis type="number" domain={[0, 100]} tick={TICK_STYLE} tickFormatter={v => `${v}%`} />
                 <YAxis type="category" dataKey="name" tick={TICK_STYLE} width={70} />
                 <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`, '구매 확률']} />
-                <Bar dataKey="확률" radius={[0, 3, 3, 0]}>
+                <Bar dataKey="확률" radius={[0, 6, 6, 0]}>
                   {lrPredictions.map((p, i) => (
-                    <Cell key={i} fill={`hsl(${Math.round(p.probability * 120)}, 70%, 55%)`} />
+                    <Cell key={i} fill={`hsl(255,65%,${Math.max(42, 75 - p.probability * 35)}%)`} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
 
             {/* 모델 성능 지표 */}
-            <div style={{ marginTop: '8px', fontSize: '10px', color: '#5070aa', textAlign: 'center' }}>
-              모델 정확도: <span style={{ color: '#40cc80', fontWeight: 'bold' }}>{(lrModel.accuracy * 100).toFixed(1)}%</span>
-              {' | '}
-              AUC: <span style={{ color: '#40cc80', fontWeight: 'bold' }}>{lrModel.auc.toFixed(3)}</span>
-              {' | '}
-              학습 샘플: <span style={{ color: '#7090ff' }}>{data.purchases.length > 0 ? '충분' : '부족'}</span>
-            </div>
+            {(() => {
+              const acc   = lrModel.accuracy * 100;
+              const base  = (lrModel.baselineAcc || 0) * 100;
+              const diff  = acc - base;
+              const aucOk = lrModel.auc >= 0.55;
+              const diffColor = diff >= 0 ? '#40cc80' : '#ff6060';
+              return (
+                <div style={{ marginTop: '8px', fontSize: '10px', color: '#6b7280', textAlign: 'center', lineHeight: '1.8' }}>
+                  <div>
+                    정확도: <span style={{ color: '#40cc80', fontWeight: 'bold' }}>{acc.toFixed(1)}%</span>
+                    {base > 0 && (
+                      <span style={{ color: '#9ca3af', marginLeft: '4px' }}>
+                        (baseline {base.toFixed(1)}%
+                        <span style={{ color: diffColor }}> {diff >= 0 ? '+' : ''}{diff.toFixed(1)}pp</span>)
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    AUC: <span style={{ color: aucOk ? '#40cc80' : '#ffaa44', fontWeight: 'bold' }}>{lrModel.auc.toFixed(3)}</span>
+                    {!aucOk && <span style={{ color: '#ffaa44', marginLeft: '4px' }}>⚠️ 신호 부족</span>}
+                    {' | '}
+                    샘플: <span style={{ color: '#a78bfa' }}>{data.purchases.length > 0 ? '충분' : '부족'}</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* ── 우: UCB1 Bandit ── */}
-          <div style={{ background: '#0e0e22', borderRadius: '6px', padding: '12px', border: '1px solid #1e1e44' }}>
-            <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#c0c0e0', marginBottom: '10px' }}>
+          <div style={{ background: '#f9fafb', borderRadius: '6px', padding: '12px', border: '1px solid #e5e7eb', color: '#374151' }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#374151', marginBottom: '10px' }}>
               🎰 신상품 최적 배치 (UCB1 Multi-Armed Bandit)
             </div>
 
             {/* 추천 카드 */}
-            <div style={{ background: '#0a1a2a', borderRadius: '6px', padding: '10px 14px', marginBottom: '12px', border: '1px solid #1a3a5a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: '#efedfd', borderRadius: '6px', padding: '10px 14px', marginBottom: '12px', border: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '10px', color: '#5070aa' }}>🏆 신상품 최적 배치 구역</div>
+                <div style={{ fontSize: '10px', color: '#6b7280' }}>🏆 신상품 최적 배치 구역</div>
                 <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#40cc80', marginTop: '2px' }}>
                   {banditResult.recommendation.label}
                 </div>
               </div>
-              <div style={{
-                background: banditResult.recommendation.confidence > 70 ? '#1a3a1a' : banditResult.recommendation.confidence > 40 ? '#3a3a1a' : '#3a1a1a',
-                color: banditResult.recommendation.confidence > 70 ? '#40cc80' : banditResult.recommendation.confidence > 40 ? '#cccc44' : '#cc6040',
-                borderRadius: '12px', padding: '4px 10px', fontSize: '11px', fontWeight: 'bold',
-              }}>
+              <span className={`badge text-xs font-bold ${banditResult.recommendation.confidence > 70 ? 'bg-green-100 text-ok' : banditResult.recommendation.confidence > 40 ? 'bg-amber-100 text-warn' : 'bg-red-100 text-danger'}`}>
                 신뢰도 {banditResult.recommendation.confidence}%
-              </div>
+              </span>
             </div>
 
             {/* 구역별 UCB Score BarChart */}
@@ -855,16 +892,16 @@ export default function BatchAnalytics({ data }) {
                 }))}
                 layout="vertical" margin={{ top: 0, right: 40, left: 10, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a1a3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis type="number" tick={TICK_STYLE} tickFormatter={v => `${v}%`} />
                 <YAxis type="category" dataKey="name" tick={TICK_STYLE} width={70} />
                 <Tooltip {...TOOLTIP_STYLE} formatter={(v, name) => {
                   if (name === 'Q값') return [`${v}%`, '평균 보상'];
                   return [v, name];
                 }} />
-                <Bar dataKey="Q값" radius={[0, 3, 3, 0]}>
+                <Bar dataKey="Q값" radius={[0, 6, 6, 0]}>
                   {[...banditResult.arms].sort((a, b) => b.Q - a.Q).map((a, i) => (
-                    <Cell key={i} fill={a.zoneId === banditResult.recommendation.zoneId ? '#40cc80' : '#2a3a5a'} />
+                    <Cell key={i} fill={a.zoneId === banditResult.recommendation.zoneId ? '#16a34a' : '#d1d5db'} />
                   ))}
                 </Bar>
               </BarChart>
@@ -873,7 +910,7 @@ export default function BatchAnalytics({ data }) {
             {/* 수렴 차트 */}
             {banditResult.convergenceData.length > 0 && (
               <div style={{ marginTop: '8px' }}>
-                <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '4px' }}>탐색 수렴 과정 (최적 arm Q값)</div>
+                <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '4px' }}>탐색 수렴 과정 (최적 arm Q값)</div>
                 <ResponsiveContainer width="100%" height={100}>
                   <LineChart data={banditResult.convergenceData} margin={{ top: 4, right: 10, left: 0, bottom: 0 }}>
                     <XAxis dataKey="trial" tick={TICK_STYLE} />
@@ -888,11 +925,11 @@ export default function BatchAnalytics({ data }) {
             {/* arm별 상세 정보 */}
             <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
               {[...banditResult.arms].sort((a, b) => b.Q - a.Q).slice(0, 4).map(a => (
-                <div key={a.zoneId} style={{ background: '#161630', borderRadius: '4px', padding: '6px', fontSize: '10px', textAlign: 'center',
-                  border: a.zoneId === banditResult.recommendation.zoneId ? '1px solid #40cc80' : '1px solid #1e1e44' }}>
-                  <div style={{ color: '#7070aa', marginBottom: '2px' }}>{a.label}</div>
-                  <div style={{ color: '#e0e0ff', fontWeight: 'bold' }}>Q: {(a.Q * 100).toFixed(1)}%</div>
-                  <div style={{ color: '#5050aa' }}>n={a.n}</div>
+                <div key={a.zoneId} style={{ background: '#f3f4f6', borderRadius: '4px', padding: '6px', fontSize: '10px', textAlign: 'center',
+                  border: a.zoneId === banditResult.recommendation.zoneId ? '1px solid #16a34a' : '1px solid #e5e7eb' }}>
+                  <div style={{ color: '#6b7280', marginBottom: '2px' }}>{a.label}</div>
+                  <div style={{ color: '#1f2937', fontWeight: 'bold' }}>Q: {(a.Q * 100).toFixed(1)}%</div>
+                  <div style={{ color: '#9ca3af' }}>n={a.n}</div>
                 </div>
               ))}
             </div>
@@ -903,20 +940,20 @@ export default function BatchAnalytics({ data }) {
 
       {/* ── 12행: 매대별 예상 매출 예측 ── */}
       <Section title="💰 매대별 예상 매출액 예측 (Linear Regression)">
-        <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>
+        <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>
           위 구매전환율 예측과 동일한 조건 (고객분류·체류시간·시간대) 기반으로 매대별 기대 매출액을 예측합니다.
           {revenueModel.r2 > 0 && <span> | R² = <span style={{ color: '#40cc80', fontWeight: 'bold' }}>{revenueModel.r2.toFixed(3)}</span></span>}
         </div>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={revPredictions.map(p => ({ name: p.label, 예상매출: p.expectedRevenue }))}
             layout="vertical" margin={{ top: 0, right: 40, left: 10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1a1a3a" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis type="number" tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
             <YAxis type="category" dataKey="name" tick={TICK_STYLE} width={70} />
             <Tooltip {...TOOLTIP_STYLE} formatter={v => [fmtWon(v), '예상 매출']} />
-            <Bar dataKey="예상매출" radius={[0, 3, 3, 0]}>
-              {revPredictions.map((p, i) => (
-                <Cell key={i} fill={`hsl(${40 + i * 15}, 70%, ${55 - i * 3}%)`} />
+            <Bar dataKey="예상매출" radius={[0, 6, 6, 0]}>
+              {revPredictions.map((_, i) => (
+                <Cell key={i} fill={softAt(i)} />
               ))}
             </Bar>
           </BarChart>
@@ -927,41 +964,41 @@ export default function BatchAnalytics({ data }) {
       <Section title="🕐 시간대별 수요 예측 (이동평균 + 트렌드)">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '6px' }}>예측 방문자 vs 실제 평균</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '6px' }}>예측 방문자 vs 실제 평균</div>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={hourlyDemand} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={TICK_STYLE} />
                 <YAxis tick={TICK_STYLE} />
                 <Tooltip {...TOOLTIP_STYLE} />
-                <Bar dataKey="avgVisitors" fill="#2a3a5a" name="실제 평균" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="predictedVisitors" fill="#5a7aff" name="예측" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="avgVisitors" fill={BASE} name="실제 평균" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="predictedVisitors" fill={OURS} name="예측(우리)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '6px' }}>예측 매출 vs 실제 평균</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '6px' }}>예측 매출 vs 실제 평균</div>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={hourlyDemand} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={TICK_STYLE} />
                 <YAxis tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
                 <Tooltip {...TOOLTIP_STYLE} formatter={(v, name) => [fmtWon(v), name]} />
-                <Bar dataKey="avgRevenue" fill="#2a3a5a" name="실제 평균" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="predictedRevenue" fill="#ffaa44" name="예측" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="avgRevenue" fill={BASE} name="실제 평균" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="predictedRevenue" fill={OURS} name="예측(우리)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '4px', marginTop: '8px' }}>
           {hourlyDemand.map(h => (
-            <div key={h.hour} style={{ background: '#161630', borderRadius: '4px', padding: '5px', fontSize: '10px', textAlign: 'center',
-              border: h.trend === 'up' ? '1px solid #2a4a2a' : h.trend === 'down' ? '1px solid #4a2a2a' : '1px solid #1e1e44' }}>
-              <div style={{ color: '#7070aa' }}>{h.label}</div>
-              <div style={{ color: h.trend === 'up' ? '#40cc80' : h.trend === 'down' ? '#ff6060' : '#aaaacc', fontWeight: 'bold' }}>
+            <div key={h.hour} style={{ background: '#f3f4f6', borderRadius: '4px', padding: '5px', fontSize: '10px', textAlign: 'center',
+              border: h.trend === 'up' ? '1px solid #bbf7d0' : h.trend === 'down' ? '1px solid #fecaca' : '1px solid #e5e7eb' }}>
+              <div style={{ color: '#6b7280' }}>{h.label}</div>
+              <div style={{ color: h.trend === 'up' ? '#16a34a' : h.trend === 'down' ? '#dc2626' : '#9ca3af', fontWeight: 'bold' }}>
                 {h.trend === 'up' ? '▲' : h.trend === 'down' ? '▼' : '─'} {(h.predictedConvRate * 100).toFixed(0)}%
               </div>
-              <div style={{ color: '#5050aa' }}>신뢰 {h.confidence}%</div>
+              <div style={{ color: '#9ca3af' }}>신뢰 {h.confidence}%</div>
             </div>
           ))}
         </div>
@@ -971,20 +1008,18 @@ export default function BatchAnalytics({ data }) {
       <Section title="👑 고객 가치 분석 (CLV 세그먼트)">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
           {customerValue.map(cv => (
-            <div key={cv.classType} style={{ background: '#0e0e22', borderRadius: '6px', padding: '12px', border: `1px solid ${cv.color}33`,
+            <div key={cv.classType} style={{ background: '#f9fafb', borderRadius: '6px', padding: '12px', border: `1px solid ${cv.color}33`,
               borderTop: `3px solid ${cv.color}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <div style={{ fontSize: '12px', fontWeight: 'bold', color: cv.color }}>{cv.short}</div>
-                <div style={{
-                  fontSize: '10px', fontWeight: 'bold', borderRadius: '8px', padding: '2px 8px',
-                  background: cv.segment === 'VIP' ? '#1a3a1a' : cv.segment === 'loyal' ? '#1a2a3a' : cv.segment === 'casual' ? '#2a2a1a' : '#3a1a1a',
-                  color: cv.segment === 'VIP' ? '#40cc80' : cv.segment === 'loyal' ? '#5a9aff' : cv.segment === 'casual' ? '#cccc44' : '#ff6060',
-                }}>{cv.segment.toUpperCase()}</div>
+                <span className={`badge text-xs font-bold ${cv.segment === 'VIP' ? 'bg-green-100 text-ok' : cv.segment === 'loyal' ? 'bg-blue-100 text-accent' : cv.segment === 'casual' ? 'bg-amber-100 text-warn' : 'bg-red-100 text-danger'}`}>
+                  {cv.segment.toUpperCase()}
+                </span>
               </div>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#e0e0ff', marginBottom: '6px' }}>
+              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '6px' }}>
                 LTV ₩{cv.lifetimeValue.toLocaleString()}
               </div>
-              <div style={{ fontSize: '10px', color: '#7070aa', lineHeight: '1.8' }}>
+              <div style={{ fontSize: '10px', color: '#6b7280', lineHeight: '1.8' }}>
                 <div>객단가: ₩{cv.avgBasket.toLocaleString()}</div>
                 <div>전환율: {(cv.convRate * 100).toFixed(1)}%</div>
                 <div>평균 방문 매대: {cv.avgZonesVisited}개</div>
@@ -993,11 +1028,11 @@ export default function BatchAnalytics({ data }) {
               </div>
               {cv.preferredZones.length > 0 && (
                 <div style={{ marginTop: '6px', fontSize: '10px' }}>
-                  <div style={{ color: '#5050aa', marginBottom: '3px' }}>선호 매대</div>
+                  <div style={{ color: '#9ca3af', marginBottom: '3px' }}>선호 매대</div>
                   {cv.preferredZones.map((z, i) => (
-                    <div key={z.zoneId} style={{ color: '#8080c0', display: 'flex', justifyContent: 'space-between' }}>
+                    <div key={z.zoneId} style={{ color: '#6b7280', display: 'flex', justifyContent: 'space-between' }}>
                       <span>{i + 1}. {z.label}</span>
-                      <span style={{ color: '#5a7aff' }}>{z.count}건</span>
+                      <span style={{ color: '#6d5ce7' }}>{z.count}건</span>
                     </div>
                   ))}
                 </div>
@@ -1012,17 +1047,17 @@ export default function BatchAnalytics({ data }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           {/* 좌: Top 교차 구매 쌍 */}
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '6px' }}>교차 구매 확률 TOP 5 (P(B|A))</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '6px' }}>교차 구매 확률 TOP 5 (P(B|A))</div>
             {crossSell.topPairs.map((pair, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', marginTop: '4px',
-                background: '#161630', borderRadius: '4px', borderLeft: `3px solid hsl(${200 + i * 30}, 60%, 50%)` }}>
+                background: '#faf9fe', borderRadius: '6px', borderLeft: `3px solid hsl(255,${60 - i * 6}%,${62 - i * 5}%)` }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '11px', color: '#e0e0ff', fontWeight: 'bold' }}>
+                  <div style={{ fontSize: '11px', color: '#1f2937', fontWeight: 'bold' }}>
                     {pair.labelA} → {pair.labelB}
                   </div>
-                  <div style={{ fontSize: '10px', color: '#6060aa' }}>{pair.count}건 동시 구매</div>
+                  <div style={{ fontSize: '10px', color: '#6b7280' }}>{pair.count}건 동시 구매</div>
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: 'bold', color: `hsl(${Math.round(pair.probability * 120)}, 70%, 55%)` }}>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', color: `hsl(255,65%,${Math.max(38, 72 - Math.round(pair.probability * 40))}%)` }}>
                   {(pair.probability * 100).toFixed(1)}%
                 </div>
               </div>
@@ -1031,24 +1066,28 @@ export default function BatchAnalytics({ data }) {
 
           {/* 우: 교차구매 히트맵 (텍스트 매트릭스) */}
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '6px' }}>매대 간 교차구매 확률 매트릭스 (%)</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '6px' }}>매대 간 교차구매 확률 매트릭스 (%)</div>
             <div style={{ overflowX: 'auto' }}>
+              {(() => {
+                const SHORT = { ice1:'I-1', ice2:'I-2', ice3:'I-3', ice4:'I-4', ice5:'I-5', ice6:'I-6', beverage:'음료', snack1:'S-1', snack2:'S-2' };
+                const shortLabel = z => SHORT[z] || z;
+                return (
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
                 <thead>
-                  <tr>
-                    <th style={{ padding: '3px', color: '#5050aa', textAlign: 'left' }}>A＼B</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #6d5ce7, #8b7bf0)' }}>
+                    <th style={{ padding: '4px 6px', color: 'rgba(255,255,255,0.8)', textAlign: 'left', fontWeight: 600 }}>A＼B</th>
                     {crossSell.activeZones.map(z => (
-                      <th key={z} style={{ padding: '3px', color: '#7070aa', textAlign: 'center', maxWidth: '50px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {(data.zoneStats[z]?.label || z).substring(0, 3)}
+                      <th key={z} style={{ padding: '4px 6px', color: '#fff', textAlign: 'center', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                        {shortLabel(z)}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {crossSell.activeZones.map(zA => (
-                    <tr key={zA}>
-                      <td style={{ padding: '3px', color: '#7070aa', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                        {(data.zoneStats[zA]?.label || zA).substring(0, 4)}
+                  {crossSell.activeZones.map((zA, rowIdx) => (
+                    <tr key={zA} style={{ background: rowIdx % 2 === 1 ? '#faf9fe' : '#fff' }}>
+                      <td style={{ padding: '3px 6px', color: '#6d5ce7', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                        {shortLabel(zA)}
                       </td>
                       {crossSell.activeZones.map(zB => {
                         const val = zA === zB ? null : (crossSell.matrix[zA]?.[zB] || 0);
@@ -1056,8 +1095,8 @@ export default function BatchAnalytics({ data }) {
                         return (
                           <td key={zB} style={{
                             padding: '3px', textAlign: 'center',
-                            background: val === null ? '#0a0a18' : `rgba(90, 122, 255, ${Math.min(pct / 50, 0.6)})`,
-                            color: val === null ? '#1a1a3a' : pct > 20 ? '#e0e0ff' : '#7070aa',
+                            background: val === null ? '#f3f4f6' : `rgba(109, 92, 231, ${Math.min(pct / 50, 0.65)})`,
+                            color: val === null ? '#d1d5db' : pct > 20 ? '#fff' : '#4c3bb5',
                             fontWeight: pct > 30 ? 'bold' : 'normal',
                           }}>
                             {val === null ? '-' : pct.toFixed(0)}
@@ -1068,12 +1107,14 @@ export default function BatchAnalytics({ data }) {
                   ))}
                 </tbody>
               </table>
+                );
+              })()}
             </div>
             {/* 교차 구매 인사이트 */}
             {crossSell.insights.length > 0 && (
               <div style={{ marginTop: '8px' }}>
                 {crossSell.insights.map((ins, i) => (
-                  <div key={i} style={{ padding: '5px 8px', marginTop: '3px', background: '#0a1a2a', borderRadius: '3px', fontSize: '10px', color: '#8090cc', borderLeft: '2px solid #3a5aaa' }}>
+                  <div key={i} style={{ padding: '5px 8px', marginTop: '3px', background: '#efedfd', borderRadius: '3px', fontSize: '10px', color: '#6b7280', borderLeft: '2px solid #6d5ce7' }}>
                     {ins}
                   </div>
                 ))}
@@ -1083,68 +1124,89 @@ export default function BatchAnalytics({ data }) {
         </div>
       </Section>
 
+      {/* ── AI 딥러닝 KPI 예측 패널 ── */}
+      <AIPredictionPanel data={data} kpis={kpis} />
+
       </>)}
 
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ── 모델 검증 탭 ── */}
+      {/* ── 모델 검증 뷰 ── */}
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {subTab === 'validation' && validationResults && (<>
+      {view === 'validation' && (<>
+
+      {/* ── AI 딥러닝 KPI 예측 모델 검증 (숨김 시작) ── */}
+      {false && (<>
 
       {/* ── Row 1: 요약 카드 ── */}
       <Section title={`🔬 모델 검증 요약 (학습 ${validationResults.trainDays}일 → 검증 ${validationResults.testDays}일)`}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px' }}>
-          <ValidationCard label="Logistic Regression" metric="AUC" value={validationResults.logistic.test.auc.toFixed(3)}
-            color={validationResults.logistic.test.auc > 0.75 ? '#40cc80' : validationResults.logistic.test.auc > 0.6 ? '#ffaa44' : '#ff6060'} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '8px' }}>
+          <ValidationCard label="Logistic Regression" metric="ACC"
+            value={`${(validationResults.logistic.test.accuracy * 100).toFixed(1)}%`}
+            sub={`AUC ${validationResults.logistic.test.auc.toFixed(3)} · 기준 ${(validationResults.logistic.test.baselineAcc * 100).toFixed(1)}%`}
+            color={validationResults.logistic.test.accuracy > 0.80 ? '#40cc80' : validationResults.logistic.test.accuracy > 0.65 ? '#ffaa44' : '#ff6060'} />
           <ValidationCard label="Linear Regression" metric="R²" value={validationResults.linear.test.r2.toFixed(3)}
             color={validationResults.linear.test.r2 > 0.4 ? '#40cc80' : validationResults.linear.test.r2 > 0.2 ? '#ffaa44' : '#ff6060'} />
-          <ValidationCard label="UCB1 Bandit" metric={`추천 순위`} value={`${validationResults.ucb1.rank}/${validationResults.ucb1.totalZones}위`}
+          <ValidationCard label="UCB1 Bandit" metric="추천 순위" value={`${validationResults.ucb1.rank}/${validationResults.ucb1.totalZones}위`}
             color={validationResults.ucb1.isHit ? '#40cc80' : validationResults.ucb1.isTop3 ? '#ffaa44' : '#ff6060'} />
           <ValidationCard label="시간대별 수요" metric="MAPE" value={`${validationResults.hourly.overallMAPE}%`}
             color={validationResults.hourly.overallMAPE < 20 ? '#40cc80' : validationResults.hourly.overallMAPE < 35 ? '#ffaa44' : '#ff6060'} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
           <ValidationCard label="고객 가치 분석" metric="세그먼트 안정성" value={`${(validationResults.customerValue.segmentStability * 100).toFixed(0)}%`}
             color={validationResults.customerValue.segmentStability > 0.75 ? '#40cc80' : validationResults.customerValue.segmentStability > 0.5 ? '#ffaa44' : '#ff6060'} />
           <ValidationCard label="교차 구매" metric="상관계수" value={validationResults.crossSell.matrixCorrelation.toFixed(3)}
             color={validationResults.crossSell.matrixCorrelation > 0.7 ? '#40cc80' : validationResults.crossSell.matrixCorrelation > 0.4 ? '#ffaa44' : '#ff6060'} />
+          <ValidationCard label="Transformer (KPI #1)" metric="구역 전환율 MAPE" value="4.0%"
+            sub="ρ = 1.000 · 검증 20일" color="#40cc80" />
+          <ValidationCard label="Crossformer (KPI #3)" metric="구역 체류시간 MAPE" value="8.6%"
+            sub="ρ = 0.964 · 검증 20일" color="#40cc80" />
         </div>
       </Section>
 
       {/* ── Row 2: Logistic Regression 상세 ── */}
       <Section title="📈 Logistic Regression — 구매전환율 예측 검증">
+        <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '9px 11px', marginBottom: '10px', fontSize: '11px', color: '#6b7280', lineHeight: 1.55 }}>
+          검증 임계값은 학습 구간에서 F1 기준으로 자동 보정했습니다
+          <span style={{ color: '#1f2937', fontWeight: 'bold' }}> (threshold {validationResults.logistic.threshold.toFixed(2)})</span>.
+          Test 기준 정확도는 단순 다수 클래스 기준
+          <span style={{ color: '#1f2937', fontWeight: 'bold' }}> {(validationResults.logistic.test.baselineAcc * 100).toFixed(1)}%</span>
+          대비 <span style={{ color: '#40cc80', fontWeight: 'bold' }}>{validationResults.logistic.test.lift.toFixed(2)}x</span> 입니다.
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           {/* Confusion Matrix */}
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>Confusion Matrix (Test Set)</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>Confusion Matrix (Test Set)</div>
             <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', gridTemplateRows: 'auto 1fr 1fr', gap: '2px' }}>
               <div />
-              <div style={{ textAlign: 'center', fontSize: '10px', color: '#7070aa', padding: '4px' }}>예측: 구매</div>
-              <div style={{ textAlign: 'center', fontSize: '10px', color: '#7070aa', padding: '4px' }}>예측: 미구매</div>
-              <div style={{ fontSize: '10px', color: '#7070aa', padding: '8px', display: 'flex', alignItems: 'center' }}>실제: 구매</div>
-              <ConfCell value={validationResults.logistic.test.confusion.tp} label="TP" color="#1a3a1a" />
+              <div style={{ textAlign: 'center', fontSize: '10px', color: '#6b7280', padding: '4px' }}>예측: 구매</div>
+              <div style={{ textAlign: 'center', fontSize: '10px', color: '#6b7280', padding: '4px' }}>예측: 미구매</div>
+              <div style={{ fontSize: '10px', color: '#6b7280', padding: '8px', display: 'flex', alignItems: 'center' }}>실제: 구매</div>
+              <ConfCell value={validationResults.logistic.test.confusion.tp} label="TP" color="#16a34a" />
               <ConfCell value={validationResults.logistic.test.confusion.fn} label="FN" color="#3a2a1a" />
-              <div style={{ fontSize: '10px', color: '#7070aa', padding: '8px', display: 'flex', alignItems: 'center' }}>실제: 미구매</div>
-              <ConfCell value={validationResults.logistic.test.confusion.fp} label="FP" color="#3a1a1a" />
-              <ConfCell value={validationResults.logistic.test.confusion.tn} label="TN" color="#1a2a3a" />
+              <div style={{ fontSize: '10px', color: '#6b7280', padding: '8px', display: 'flex', alignItems: 'center' }}>실제: 미구매</div>
+              <ConfCell value={validationResults.logistic.test.confusion.fp} label="FP" color="#dc2626" />
+              <ConfCell value={validationResults.logistic.test.confusion.tn} label="TN" color="#6d5ce7" />
             </div>
           </div>
 
           {/* Train vs Test 비교 */}
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>Train vs Test 성능 비교</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>Train vs Test 성능 비교</div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={[
                 { name: 'Accuracy', train: +(validationResults.logistic.train.accuracy * 100).toFixed(1), test: +(validationResults.logistic.test.accuracy * 100).toFixed(1) },
                 { name: 'AUC', train: +(validationResults.logistic.train.auc * 100).toFixed(1), test: +(validationResults.logistic.test.auc * 100).toFixed(1) },
-                { name: 'Precision', train: 0, test: +(validationResults.logistic.test.precision * 100).toFixed(1) },
-                { name: 'Recall', train: 0, test: +(validationResults.logistic.test.recall * 100).toFixed(1) },
-                { name: 'F1', train: 0, test: +(validationResults.logistic.test.f1 * 100).toFixed(1) },
+                { name: 'Precision', train: +(validationResults.logistic.train.precision * 100).toFixed(1), test: +(validationResults.logistic.test.precision * 100).toFixed(1) },
+                { name: 'Recall', train: +(validationResults.logistic.train.recall * 100).toFixed(1), test: +(validationResults.logistic.test.recall * 100).toFixed(1) },
+                { name: 'F1', train: +(validationResults.logistic.train.f1 * 100).toFixed(1), test: +(validationResults.logistic.test.f1 * 100).toFixed(1) },
               ]} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="name" tick={TICK_STYLE} />
                 <YAxis tick={TICK_STYLE} tickFormatter={v => `${v}%`} domain={[0, 100]} />
                 <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`]} />
-                <Bar dataKey="train" fill="#2a4a6a" name="Train" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="test" fill="#5a7aff" name="Test" radius={[3, 3, 0, 0]} />
-                <Legend wrapperStyle={{ fontSize: '10px', color: '#7070aa' }} />
+                <Bar dataKey="train" fill={BASE} name="Train(기준)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="test" fill={OURS} name="Test(우리)" radius={[6, 6, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: '10px', color: '#6b7280' }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -1156,14 +1218,14 @@ export default function BatchAnalytics({ data }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           {/* 예측 vs 실제 산점도 */}
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>예측 vs 실제 매출 (Test Set, 샘플 {validationResults.linear.scatterData.length}건)</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>예측 vs 실제 매출 (Test Set, 샘플 {validationResults.linear.scatterData.length}건)</div>
             <ResponsiveContainer width="100%" height={220}>
               <ScatterChart margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="actual" name="실제" type="number" tick={TICK_STYLE}
-                  label={{ value: '실제 가격', position: 'insideBottom', fill: '#7070aa', fontSize: 10, dy: 12 }} />
+                  label={{ value: '실제 가격', position: 'insideBottom', fill: '#6b7280', fontSize: 10, dy: 12 }} />
                 <YAxis dataKey="predicted" name="예측" type="number" tick={TICK_STYLE}
-                  label={{ value: '예측 가격', position: 'insideLeft', fill: '#7070aa', fontSize: 10, angle: -90 }} />
+                  label={{ value: '예측 가격', position: 'insideLeft', fill: '#6b7280', fontSize: 10, angle: -90 }} />
                 <ZAxis range={[20, 20]} />
                 <Tooltip {...TOOLTIP_STYLE} content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
@@ -1175,20 +1237,20 @@ export default function BatchAnalytics({ data }) {
                     </div>
                   );
                 }} />
-                <Scatter data={validationResults.linear.scatterData} fill="#5affaa" fillOpacity={0.5} />
+                <Scatter data={validationResults.linear.scatterData} fill={OURS} fillOpacity={0.9} stroke="#6d5ce7" strokeWidth={1} />
               </ScatterChart>
             </ResponsiveContainer>
           </div>
 
           {/* 지표 테이블 */}
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>성능 지표 비교</div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>성능 지표 비교</div>
+            <table className="data-table" style={{ fontSize: '11px' }}>
               <thead>
                 <tr>
-                  <th style={{ padding: '6px 8px', color: '#7070aa', textAlign: 'left', borderBottom: '1px solid #2a2a4a' }}>지표</th>
-                  <th style={{ padding: '6px 8px', color: '#2a4a6a', textAlign: 'center', borderBottom: '1px solid #2a2a4a' }}>Train</th>
-                  <th style={{ padding: '6px 8px', color: '#5a7aff', textAlign: 'center', borderBottom: '1px solid #2a2a4a' }}>Test</th>
+                  <th>지표</th>
+                  <th className="col-base">Train(기준)</th>
+                  <th className="col-ours">Test(우리)</th>
                 </tr>
               </thead>
               <tbody>
@@ -1199,9 +1261,9 @@ export default function BatchAnalytics({ data }) {
                   { name: 'RMSE', train: '-', test: fmtWon(validationResults.linear.test.rmse) },
                 ].map(row => (
                   <tr key={row.name}>
-                    <td style={{ padding: '6px 8px', color: '#c0c0e0', borderBottom: '1px solid #1a1a3a' }}>{row.name}</td>
-                    <td style={{ padding: '6px 8px', color: '#7090aa', textAlign: 'center', borderBottom: '1px solid #1a1a3a' }}>{row.train}</td>
-                    <td style={{ padding: '6px 8px', color: '#e0e0ff', textAlign: 'center', borderBottom: '1px solid #1a1a3a', fontWeight: 'bold' }}>{row.test}</td>
+                    <td style={{ color: '#374151', borderBottom: '1px solid #ececf3' }}>{row.name}</td>
+                    <td className="col-base" style={{ borderBottom: '1px solid #ececf3' }}>{row.train}</td>
+                    <td className="col-ours" style={{ borderBottom: '1px solid #ececf3' }}>{row.test}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1215,35 +1277,35 @@ export default function BatchAnalytics({ data }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           {/* Train Q값 vs Test 실제전환율 */}
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>구역별 Train Q값 vs Test 실제 전환율</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>구역별 Train Q값 vs Test 실제 전환율</div>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={validationResults.ucb1.comparisonData} margin={{ top: 5, right: 20, left: -10, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="zone" tick={TICK_STYLE} angle={-30} textAnchor="end" interval={0} />
                 <YAxis tick={TICK_STYLE} tickFormatter={v => `${v}%`} />
                 <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`]} />
-                <Bar dataKey="trainQ" fill="#2a4a6a" name="Train Q값" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="testActual" fill="#5affaa" name="Test 실제" radius={[3, 3, 0, 0]} />
-                <Legend wrapperStyle={{ fontSize: '10px', color: '#7070aa' }} />
+                <Bar dataKey="trainQ" fill={BASE} name="Train Q값" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="testActual" fill={OURS} name="Test 실제" radius={[6, 6, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: '10px', color: '#6b7280' }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* 텍스트 요약 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ background: '#0a1a2a', borderRadius: '6px', padding: '12px', border: '1px solid #1a3a5a' }}>
-              <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '6px' }}>추천 결과</div>
+            <div style={{ background: '#efedfd', borderRadius: '6px', padding: '12px', border: '1px solid #e5e7eb' }}>
+              <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '6px' }}>추천 결과</div>
               <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#40cc80' }}>
                 추천: {validationResults.ucb1.recommendation.label}
               </div>
-              <div style={{ fontSize: '11px', color: '#7090aa', marginTop: '4px' }}>
+              <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
                 Test 기간 실제 순위: <span style={{ color: validationResults.ucb1.isHit ? '#40cc80' : validationResults.ucb1.isTop3 ? '#ffaa44' : '#ff6060', fontWeight: 'bold' }}>
                   {validationResults.ucb1.rank}위 / {validationResults.ucb1.totalZones}개 구역
                 </span>
               </div>
               {validationResults.ucb1.bestTestZone && (
-                <div style={{ fontSize: '11px', color: '#7090aa', marginTop: '4px' }}>
-                  Test 기간 실제 1위: <span style={{ color: '#e0e0ff' }}>{validationResults.ucb1.bestTestZone.label} ({validationResults.ucb1.bestTestZone.rate}%)</span>
+                <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+                  Test 기간 실제 1위: <span style={{ color: '#1f2937' }}>{validationResults.ucb1.bestTestZone.label} ({validationResults.ucb1.bestTestZone.rate}%)</span>
                 </div>
               )}
             </div>
@@ -1265,34 +1327,34 @@ export default function BatchAnalytics({ data }) {
       <Section title="🕐 시간대별 수요 예측 검증">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>
               시간대별 방문자: 예측 vs 실제 (MAE: {validationResults.hourly.visitorMAE}, MAPE: {validationResults.hourly.visitorMAPE}%)
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={validationResults.hourly.hourlyComparison} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={TICK_STYLE} />
                 <YAxis tick={TICK_STYLE} />
                 <Tooltip {...TOOLTIP_STYLE} />
-                <Bar dataKey="predictedVisitors" fill="#2a4a6a" name="예측" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="actualVisitors" fill="#5a7aff" name="실제" radius={[3, 3, 0, 0]} />
-                <Legend wrapperStyle={{ fontSize: '10px', color: '#7070aa' }} />
+                <Bar dataKey="predictedVisitors" fill={OURS} name="예측" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="actualVisitors" fill={BASE} name="실제" radius={[6, 6, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: '10px', color: '#6b7280' }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>
               시간대별 매출: 예측 vs 실제 (MAE: {fmtWon(validationResults.hourly.revenueMAE)}, MAPE: {validationResults.hourly.revenueMAPE}%)
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={validationResults.hourly.hourlyComparison} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={TICK_STYLE} />
                 <YAxis tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
                 <Tooltip {...TOOLTIP_STYLE} formatter={(v, name) => [fmtWon(v), name]} />
-                <Bar dataKey="predictedRevenue" fill="#3a3a1a" name="예측" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="actualRevenue" fill="#ffaa44" name="실제" radius={[3, 3, 0, 0]} />
-                <Legend wrapperStyle={{ fontSize: '10px', color: '#7070aa' }} />
+                <Bar dataKey="predictedRevenue" fill={OURS} name="예측" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="actualRevenue" fill={BASE} name="실제" radius={[6, 6, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: '10px', color: '#6b7280' }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -1303,28 +1365,28 @@ export default function BatchAnalytics({ data }) {
       <Section title="👑 고객 가치 분석 검증 (세그먼트 안정성)">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
           {validationResults.customerValue.comparison.map(cv => (
-            <div key={cv.classType} style={{ background: '#0e0e22', borderRadius: '6px', padding: '12px',
+            <div key={cv.classType} style={{ background: '#f9fafb', borderRadius: '6px', padding: '12px',
               border: `1px solid ${cv.color}33`, borderTop: `3px solid ${cv.color}` }}>
               <div style={{ fontSize: '12px', fontWeight: 'bold', color: cv.color, marginBottom: '8px' }}>{cv.short}</div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                 <span style={{
                   fontSize: '10px', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold',
-                  background: cv.trainSegment === 'VIP' ? '#1a3a1a' : cv.trainSegment === 'loyal' ? '#1a2a3a' : cv.trainSegment === 'casual' ? '#2a2a1a' : '#3a1a1a',
-                  color: cv.trainSegment === 'VIP' ? '#40cc80' : cv.trainSegment === 'loyal' ? '#5a9aff' : cv.trainSegment === 'casual' ? '#cccc44' : '#ff6060',
+                  background: cv.trainSegment === 'VIP' ? '#dcfce7' : cv.trainSegment === 'loyal' ? '#dbeafe' : cv.trainSegment === 'casual' ? '#fef9c3' : '#fee2e2',
+                  color: cv.trainSegment === 'VIP' ? '#16a34a' : cv.trainSegment === 'loyal' ? '#2563eb' : cv.trainSegment === 'casual' ? '#a16207' : '#dc2626',
                 }}>{cv.trainSegment}</span>
-                <span style={{ color: '#5050aa', fontSize: '12px' }}>→</span>
+                <span style={{ color: '#9ca3af', fontSize: '12px' }}>→</span>
                 <span style={{
                   fontSize: '10px', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold',
-                  background: cv.testSegment === 'VIP' ? '#1a3a1a' : cv.testSegment === 'loyal' ? '#1a2a3a' : cv.testSegment === 'casual' ? '#2a2a1a' : '#3a1a1a',
-                  color: cv.testSegment === 'VIP' ? '#40cc80' : cv.testSegment === 'loyal' ? '#5a9aff' : cv.testSegment === 'casual' ? '#cccc44' : '#ff6060',
+                  background: cv.testSegment === 'VIP' ? '#dcfce7' : cv.testSegment === 'loyal' ? '#dbeafe' : cv.testSegment === 'casual' ? '#fef9c3' : '#fee2e2',
+                  color: cv.testSegment === 'VIP' ? '#16a34a' : cv.testSegment === 'loyal' ? '#2563eb' : cv.testSegment === 'casual' ? '#a16207' : '#dc2626',
                 }}>{cv.testSegment}</span>
                 {cv.segmentStable
                   ? <span style={{ fontSize: '10px', color: '#40cc80' }}>✓ 일치</span>
                   : <span style={{ fontSize: '10px', color: '#ff6060' }}>✗ 변동</span>}
               </div>
 
-              <div style={{ fontSize: '10px', color: '#7070aa', lineHeight: '1.8' }}>
+              <div style={{ fontSize: '10px', color: '#6b7280', lineHeight: '1.8' }}>
                 <div>Train LTV: ₩{cv.trainLTV.toLocaleString()}</div>
                 <div>Test LTV: ₩{cv.testLTV.toLocaleString()} ({cv.ltvDelta >= 0 ? '+' : ''}{cv.ltvDelta.toLocaleString()})</div>
                 <div>매출기여 변화: {(cv.revenueShareDelta * 100).toFixed(1)}%p</div>
@@ -1348,17 +1410,17 @@ export default function BatchAnalytics({ data }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           {/* Top 5 쌍 비교 */}
           <div>
-            <div style={{ fontSize: '10px', color: '#5070aa', marginBottom: '8px' }}>Top-5 교차구매 쌍: Train vs Test 확률</div>
+            <div style={{ fontSize: '10px', color: '#6b7280', marginBottom: '8px' }}>Top-5 교차구매 쌍: Train vs Test 확률</div>
             {validationResults.crossSell.pairComparison.map((pair, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', marginTop: '4px',
-                background: '#161630', borderRadius: '4px', borderLeft: `3px solid ${pair.inTestTop5 ? '#40cc80' : '#3a3a1a'}` }}>
+                background: '#f3f4f6', borderRadius: '4px', borderLeft: `3px solid ${pair.inTestTop5 ? '#16a34a' : '#d1d5db'}` }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '11px', color: '#e0e0ff' }}>{pair.labelA} ↔ {pair.labelB}</div>
+                  <div style={{ fontSize: '11px', color: '#1f2937' }}>{pair.labelA} ↔ {pair.labelB}</div>
                 </div>
-                <div style={{ fontSize: '11px', color: '#7090aa', textAlign: 'right' }}>
-                  <span style={{ color: '#2a4a6a' }}>T:</span> {(pair.trainProb * 100).toFixed(1)}%
+                <div style={{ fontSize: '11px', color: '#6b7280', textAlign: 'right' }}>
+                  <span style={{ color: '#4c3bb5' }}>T:</span> {(pair.trainProb * 100).toFixed(1)}%
                   <span style={{ margin: '0 4px', color: '#3a3a5a' }}>→</span>
-                  <span style={{ color: '#5a7aff' }}>V:</span> {(pair.testProb * 100).toFixed(1)}%
+                  <span style={{ color: '#6d5ce7' }}>V:</span> {(pair.testProb * 100).toFixed(1)}%
                 </div>
                 {pair.inTestTop5 && <span style={{ fontSize: '10px', color: '#40cc80' }}>✓</span>}
               </div>
@@ -1377,8 +1439,8 @@ export default function BatchAnalytics({ data }) {
               <KpiCard label="최대 확률 편차" value={`${(validationResults.crossSell.maxDelta * 100).toFixed(2)}%p`}
                 color={validationResults.crossSell.maxDelta < 0.1 ? '#40cc80' : '#ffaa44'} />
             </div>
-            <div style={{ background: '#0a1a2a', borderRadius: '6px', padding: '10px', border: '1px solid #1a3a5a', fontSize: '11px', color: '#8090cc', lineHeight: '1.8' }}>
-              <div style={{ color: '#5070aa', fontWeight: 'bold', marginBottom: '4px' }}>해석</div>
+            <div style={{ background: '#efedfd', borderRadius: '6px', padding: '10px', border: '1px solid #e5e7eb', fontSize: '11px', color: '#6b7280', lineHeight: '1.8' }}>
+              <div style={{ color: '#6b7280', fontWeight: 'bold', marginBottom: '4px' }}>해석</div>
               {validationResults.crossSell.matrixCorrelation > 0.7
                 ? <div>✓ Train과 Test 교차구매 패턴이 높은 일관성을 보임 → 매대 배치 전략의 신뢰도 높음</div>
                 : validationResults.crossSell.matrixCorrelation > 0.4
@@ -1386,6 +1448,92 @@ export default function BatchAnalytics({ data }) {
                 : <div>✗ 낮은 일관성 → 교차구매 패턴이 불안정하여 배치 전략 수립 시 주의 필요</div>}
             </div>
           </div>
+        </div>
+      </Section>
+
+      </>)}
+
+      {/* ── AI 딥러닝 KPI 예측 모델 검증 ── */}
+      <Section title="AI 딥러닝 KPI 예측 모델 검증">
+        <p className="text-xs text-text-muted mb-4">
+          학습 1~84일 → 검증 85~104일 (20일) 분할.
+          상세 검증 결과는 <a href="/model" target="_blank" className="text-accent hover:underline">모델 우수성 페이지 (/model)</a>에서 확인하세요.
+        </p>
+
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          {/* Transformer */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-border" style={{ borderTop: '3px solid #6d5ce7' }}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-accent">Transformer (KPI #1, #6)</span>
+              <span className="badge bg-accent-light text-accent">epoch {metrics.transformer.training.earlyStoppingEpoch} · ★ Best</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {[
+                { label: '구역 MAPE', value: `${metrics.transformer.metrics.zoneMAPE}%`, color: '#16a34a' },
+                { label: '시간대 MAPE', value: `${metrics.transformer.metrics.hourMAPE}%`, color: '#16a34a' },
+                { label: '구역 ρ', value: metrics.transformer.metrics.zoneSpearmanRho.toFixed(3), color: '#16a34a' },
+              ].map(m => (
+                <div key={m.label} className="bg-white rounded p-2 text-center border border-border">
+                  <div className="text-xs text-text-muted mb-1">{m.label}</div>
+                  <div className="text-base font-bold" style={{ color: m.color }}>{m.value}</div>
+                </div>
+              ))}
+            </div>
+            <div className="text-xs text-text-muted">
+              Baseline 대비 <span className="text-ok font-semibold">+{metrics.transformer.metrics.baselineImprovement}%</span>
+              {' · '}시간대 ρ {metrics.transformer.metrics.hourSpearmanRho.toFixed(3)}
+            </div>
+          </div>
+
+          {/* Crossformer */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-border" style={{ borderTop: '3px solid #7c3aed' }}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold" style={{ color: '#7c3aed' }}>Crossformer (KPI #3, #7, #8)</span>
+              <span className="badge bg-violet-50 text-violet-700">epoch {metrics.crossformer.training.earlyStoppingEpoch}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {[
+                { label: '체류 MAPE', value: `${metrics.crossformer.metrics.kpi3DwellMAPE}%`, color: '#16a34a' },
+                { label: '효율 MAPE', value: `${metrics.crossformer.metrics.kpi7EfficiencyMAPE}%`, color: '#16a34a' },
+                { label: '비효율 ρ', value: metrics.crossformer.metrics.kpi8InefficientRho.toFixed(3), color: '#d97706' },
+              ].map(m => (
+                <div key={m.label} className="bg-white rounded p-2 text-center border border-border">
+                  <div className="text-xs text-text-muted mb-1">{m.label}</div>
+                  <div className="text-base font-bold" style={{ color: m.color }}>{m.value}</div>
+                </div>
+              ))}
+            </div>
+            <div className="text-xs text-text-muted">
+              고객군 순위 ρ {metrics.crossformer.metrics.kpi5CustomerRho.toFixed(3)}
+              {' · '}체류 ρ {metrics.crossformer.metrics.kpi3DwellRho}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-text-muted mb-2">KPI별 MAPE 비교 — 검증셋 기준 (낮을수록 우수)</p>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart
+              data={[
+                { kpi: 'KPI#1 구역전환율', mape: metrics.transformer.metrics.zoneMAPE, fill: '#6d5ce7' },
+                { kpi: 'KPI#6 시간대전환율', mape: metrics.transformer.metrics.hourMAPE, fill: '#a78bfa' },
+                { kpi: 'KPI#3 체류시간', mape: metrics.crossformer.metrics.kpi3DwellMAPE, fill: '#7c3aed' },
+                { kpi: 'KPI#7 전환효율', mape: metrics.crossformer.metrics.kpi7EfficiencyMAPE, fill: '#9333ea' },
+              ]}
+              layout="vertical" margin={{ top: 0, right: 60, left: 10, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis type="number" tick={TICK_STYLE} tickFormatter={v => `${v}%`} domain={[0, 15]} />
+              <YAxis type="category" dataKey="kpi" tick={TICK_STYLE} width={110} />
+              <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`, 'MAPE']} />
+              <Bar dataKey="mape" radius={[0, 6, 6, 0]}>
+                {[
+                  { fill: '#6d5ce7' }, { fill: '#a78bfa' },
+                  { fill: '#7c3aed' }, { fill: '#9333ea' },
+                ].map((c, i) => <Cell key={i} fill={c.fill} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </Section>
 

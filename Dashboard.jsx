@@ -3,7 +3,14 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line, PieChart, Pie, CartesianGrid,
 } from 'recharts';
-import BatchAnalytics from './src/BatchAnalytics.jsx';
+import {
+  Play, Pause, RotateCcw, Settings, BarChart2, Brain, FlaskConical,
+  Users, ShoppingCart, TrendingUp, AlertTriangle, Download, Map,
+  Flame, Layers, ChevronDown, ChevronRight, ExternalLink, Zap,
+  Clock, DollarSign, Activity,
+} from 'lucide-react';
+
+const BatchAnalytics = React.lazy(() => import('./src/BatchAnalytics.jsx'));
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 상수
@@ -22,101 +29,116 @@ const CUSTOMER_CLASSES = {
 };
 const CLASS_KEYS = Object.keys(CUSTOMER_CLASSES);
 
+// ── 실제 아이스크림 무인매장 KPI 기반 구역 정의 ──────────────────────────────
+// ice_zone_kpi / ice_class_kpi / ice_batch_purchases 데이터 모사
+// 레이아웃: 3열 × 3행 그리드 (캔버스 800×600)
 const ZONES = [
   {
-    id: 'snack',      label: '과자/스낵', x:  20, y: 50, w: 165, h: 70,
-    preferred: ['minor_male', 'minor_female'],
+    id: 'ice1', label: '아이스크림1', x: 15, y: 45, w: 240, h: 65,
+    preferred: ['adult_male'],
+    conversionRate: 0.50,  // 실측 전환율 50%
+    dwellRange: [3, 10],   // 시뮬레이션 체류시간(초) 범위
     items: [
-      { name: '새우깡',       price: 1500 }, { name: '포카칩',     price: 1800 },
-      { name: '초코파이',     price: 2500 }, { name: '오레오',     price: 2200 },
-      { name: '프링글스',     price: 2800 }, { name: '허니버터칩', price: 2000 },
-      { name: '꼬깔콘',       price: 1200 }, { name: '빠다코코낫', price: 1500 },
-      { name: '젤리',         price: 1000 }, { name: '사탕',       price:  800 },
+      { name: '수박바',     price:  700 }, { name: '스크류바',   price:  600 },
+      { name: '죠스바',     price:  700 }, { name: '쮸쮸바',     price:  400 },
+      { name: '아이스바',   price:  800 },
     ],
   },
   {
-    id: 'beverage',   label: '음료', x: 210, y: 50, w: 165, h: 70,
+    id: 'ice2', label: '아이스크림2', x: 275, y: 45, w: 240, h: 65,
+    preferred: ['adult_male'],
+    conversionRate: 1.00,  // 실측 전환율 100%
+    dwellRange: [5, 15],
+    items: [
+      { name: '나뚜루파인트', price: 3000 }, { name: '하겐다즈',   price: 3500 },
+      { name: '투게더',       price: 2500 }, { name: '아이스세트', price: 2800 },
+      { name: '메로나4입',    price: 2400 },
+    ],
+  },
+  {
+    id: 'ice3', label: '아이스크림3', x: 535, y: 45, w: 240, h: 65,
+    preferred: ['adult_male', 'adult_female'],
+    conversionRate: 0.71,  // 실측 전환율 71.4%
+    dwellRange: [4, 12],
+    items: [
+      { name: '비비빅',   price: 1400 }, { name: '부라보콘', price: 1200 },
+      { name: '구구콘',   price: 1200 }, { name: '빵빠레',   price: 1400 },
+      { name: '메로나',   price:  600 }, { name: '조각케이크', price: 1800 },
+    ],
+  },
+  {
+    id: 'ice4', label: '아이스크림4', x: 15, y: 165, w: 240, h: 65,
+    preferred: ['adult_male', 'minor_female'],
+    conversionRate: 1.00,  // 실측 전환율 100%
+    dwellRange: [8, 20],
+    items: [
+      { name: '투게더대',     price: 2000 }, { name: '프리미엄하드', price: 1800 },
+      { name: '아이스케이크', price: 2500 }, { name: '대용량아이스', price: 1500 },
+      { name: '특대아이스바', price: 1400 },
+    ],
+  },
+  {
+    id: 'ice5', label: '아이스크림5', x: 275, y: 165, w: 240, h: 65,
     preferred: ['adult_male', 'adult_female', 'minor_male', 'minor_female'],
+    conversionRate: 0.89,  // 실측 전환율 88.9% (최고인기)
+    dwellRange: [3, 12],
     items: [
-      { name: '콜라',         price: 1500 }, { name: '사이다',       price: 1500 },
-      { name: '커피',         price: 2000 }, { name: '주스',         price: 2500 },
-      { name: '이온음료',     price: 1800 }, { name: '녹차',         price: 1200 },
-      { name: '에너지드링크', price: 2200 }, { name: '우유',         price: 1800 },
-      { name: '두유',         price: 1500 }, { name: '탄산수',       price: 1200 },
+      { name: '카나페',   price: 1200 }, { name: '설레임',   price: 1200 },
+      { name: '탱크보이', price:  800 }, { name: '스크류바', price:  600 },
+      { name: '수박바',   price:  600 }, { name: '죠스바',   price:  600 },
     ],
   },
   {
-    id: 'daily',      label: '생활용품', x: 400, y: 50, w: 165, h: 70,
+    id: 'ice6', label: '아이스크림6', x: 535, y: 165, w: 240, h: 65,
+    preferred: ['adult_male', 'minor_male'],
+    conversionRate: 0.70,  // 실측 전환율 70% (최다방문·최고매출)
+    dwellRange: [5, 20],
+    items: [
+      { name: '월드콘',       price: 1200 }, { name: '빵빠레',       price: 1200 },
+      { name: '구구콘',       price: 1200 }, { name: '아이스샌드',   price: 1800 },
+      { name: '하드보스',     price: 1200 }, { name: '허니버터아이스', price: 1800 },
+      { name: '누가바',       price: 1800 }, { name: '와사비맛',     price:  600 },
+    ],
+  },
+  {
+    id: 'beverage', label: '음료', x: 15, y: 285, w: 240, h: 65,
     preferred: ['adult_male', 'adult_female'],
+    conversionRate: 0.75,  // 실측 전환율 75%
+    dwellRange: [3, 10],
     items: [
-      { name: '샴푸',     price: 8000 }, { name: '치약',     price: 3500 },
-      { name: '세제',     price: 5000 }, { name: '비누',     price: 2000 },
-      { name: '칫솔',     price: 3000 }, { name: '수건',     price: 5000 },
-      { name: '휴지',     price: 4500 }, { name: '주방세제', price: 4000 },
-      { name: '핸드크림', price: 6000 }, { name: '바디로션', price: 8000 },
+      { name: '커피',         price: 1500 }, { name: '아메리카노', price: 2000 },
+      { name: '카페라떼',     price: 2000 }, { name: '포카리스웨트', price: 1800 },
+      { name: '파워에이드',   price: 1500 },
     ],
   },
   {
-    id: 'cosmetic',   label: '화장품', x: 590, y: 50, w: 165, h: 70,
-    preferred: ['adult_female'],
+    id: 'snack1', label: '과자1', x: 275, y: 285, w: 240, h: 65,
+    preferred: ['adult_male', 'minor_male'],
+    conversionRate: 1.00,  // 실측 전환율 100%
+    dwellRange: [3, 10],
     items: [
-      { name: '립스틱',     price: 15000 }, { name: '파운데이션', price: 25000 },
-      { name: '마스카라',   price: 12000 }, { name: '아이섀도',   price: 18000 },
-      { name: '블러셔',     price: 14000 }, { name: '컨실러',     price: 16000 },
-      { name: 'BB크림',     price: 18000 }, { name: '선크림',     price: 20000 },
-      { name: '립밤',       price:  8000 }, { name: '아이라이너', price: 12000 },
+      { name: '포테이토칩', price: 1500 }, { name: '크래커',   price: 1200 },
+      { name: '초코과자',   price: 1800 }, { name: '새우과자', price: 1500 },
+      { name: '콘스낵',     price: 1200 },
     ],
   },
   {
-    id: 'stationery', label: '문구', x:  20, y: 180, w: 165, h: 70,
-    preferred: ['minor_male', 'minor_female'],
+    id: 'snack2', label: '과자2', x: 535, y: 285, w: 240, h: 65,
+    preferred: ['minor_female', 'minor_male', 'adult_male'],
+    conversionRate: 0.43,  // 실측 전환율 42.9% (최저 - 비효율 구역)
+    dwellRange: [5, 18],
     items: [
-      { name: '색연필',   price: 3000 }, { name: '노트',     price: 2000 },
-      { name: '펜',       price: 1000 }, { name: '스티커',   price: 1500 },
-      { name: '형광펜',   price: 1500 }, { name: '지우개',   price:  500 },
-      { name: '자',       price: 1000 }, { name: '풀',       price: 1200 },
-      { name: '테이프',   price: 1500 }, { name: '스케치북', price: 4000 },
-    ],
-  },
-  {
-    id: 'frozen',     label: '냉동식품', x: 210, y: 180, w: 165, h: 70,
-    preferred: ['adult_male', 'adult_female'],
-    items: [
-      { name: '아이스크림',   price:  2000 }, { name: '만두',       price: 5000 },
-      { name: '냉동피자',     price:  8000 }, { name: '냉동치킨',   price: 9000 },
-      { name: '군만두',       price:  6000 }, { name: '냉동볶음밥', price: 4500 },
-      { name: '냉동새우',     price: 12000 }, { name: '어묵',       price: 3000 },
-      { name: '핫도그',       price:  2500 }, { name: '냉동라면',   price: 3500 },
-    ],
-  },
-  {
-    id: 'premium',    label: '프리미엄', x: 400, y: 180, w: 165, h: 70,
-    preferred: ['adult_male', 'adult_female'],
-    items: [
-      { name: '와인',       price: 25000 }, { name: '위스키',     price: 45000 },
-      { name: '프리미엄커피', price: 12000 }, { name: '수입과자', price:  8000 },
-      { name: '샴페인',     price: 35000 }, { name: '럼',         price: 28000 },
-      { name: '브랜디',     price: 42000 }, { name: '수입초콜릿', price: 15000 },
-      { name: '수입치즈',   price: 18000 }, { name: '수입와인',   price: 32000 },
-    ],
-  },
-  {
-    id: 'bakery',     label: '베이커리', x: 590, y: 180, w: 165, h: 70,
-    preferred: ['minor_female', 'adult_female'],
-    items: [
-      { name: '크로아상',   price:  3000 }, { name: '케이크',     price: 15000 },
-      { name: '샌드위치',   price:  4500 }, { name: '마카롱',     price:  5000 },
-      { name: '베이글',     price:  2500 }, { name: '소금빵',     price:  2000 },
-      { name: '시나몬롤',   price:  3500 }, { name: '머핀',       price:  2500 },
-      { name: '치즈케이크', price:  6000 }, { name: '에클레어',   price:  4000 },
+      { name: '바나나킥', price: 500 }, { name: '알감자', price: 500 },
+      { name: '짱구',     price: 500 }, { name: '꼬깔콘', price: 800 },
+      { name: '사탕',     price: 300 },
     ],
   },
 ];
 
+// 무인 키오스크 2대 (아이스크림 무인매장 특성 반영)
 const CHECKOUTS = [
-  { id: 'co1', x:  20, y: 430, w: 85, h: 50 },
-  { id: 'co2', x: 120, y: 430, w: 85, h: 50 },
-  { id: 'co3', x: 220, y: 430, w: 85, h: 50 },
+  { id: 'kiosk1', x: 290, y: 420, w: 100, h: 50 },
+  { id: 'kiosk2', x: 410, y: 420, w: 100, h: 50 },
 ];
 
 const ENT_X = CANVAS_W / 2;
@@ -380,7 +402,7 @@ function fmtTime(secs) {
 }
 
 // 에이전트 업데이트 (매 프레임 호출)
-function stepAgent(a, allAgents, purchases, simSecs, dt) {
+function stepAgent(a, allAgents, purchases, visitLogs, simSecs, dt) {
   const minor = a.classType.startsWith('minor');
 
   // ── 상태 머신 ──────────────────────────────────────────────────────────
@@ -422,7 +444,8 @@ function stepAgent(a, allAgents, purchases, simSecs, dt) {
           a.browseTarget = null;
           a.state        = 'shopping';
           a.dwellTimer   = 0;
-          a.dwellDuration = (minor ? 1 + Math.random() * 3 : 3 + Math.random() * 5) * _simConfig.dwellScale;
+          const [minD, maxD] = z.dwellRange || (minor ? [1, 3] : [3, 5]);
+          a.dwellDuration = (minD + Math.random() * (maxD - minD)) * _simConfig.dwellScale;
         }
       }
       break;
@@ -441,8 +464,20 @@ function stepAgent(a, allAgents, purchases, simSecs, dt) {
         if (z) {
           if (!a.visitedZones.includes(z.id)) a.visitedZones.push(z.id);
           a.dwellTime[z.id] = (a.dwellTime[z.id] || 0) + a.dwellTimer;
-          const isPref = z.preferred.includes(a.classType);
-          const buyProb = Math.min(0.85, Math.max(0.02, (isPref ? 0.35 : 0.08) + _simConfig.purchaseBonus));
+          const visitRec = {
+            agentId: a.id,
+            classType: a.classType,
+            zoneId: z.id,
+            zoneLabel: z.label,
+            dwellTime: a.dwellTimer,
+            time: fmtTime(simSecs),
+            simSecAt: simSecs,
+            purchased: false,
+          };
+          visitLogs.push(visitRec);
+          // 실제 KPI 기반 구역별 전환율 사용 (zone.conversionRate)
+          const baseProb = z.conversionRate !== undefined ? z.conversionRate : (z.preferred.includes(a.classType) ? 0.35 : 0.08);
+          const buyProb = Math.min(0.98, Math.max(0.02, baseProb + _simConfig.purchaseBonus));
           if (Math.random() < buyProb) {
             const item = z.items[Math.floor(Math.random() * z.items.length)];
             const rec = {
@@ -453,6 +488,9 @@ function stepAgent(a, allAgents, purchases, simSecs, dt) {
             };
             purchases.push(rec);
             a.purchaseHistory.push(rec);
+            visitRec.purchased = true;
+            visitRec.item = item.name;
+            visitRec.price = item.price;
           }
         }
         a.currentZone = null;
@@ -587,27 +625,44 @@ function dlCSV(filename, content) {
 // KPI 프리셋 (한국 소매 업태별 실증 데이터 기반)
 // ═══════════════════════════════════════════════════════════════════════════
 
+const ALL_ZONE_IDS_CONST = ['ice1','ice2','ice3','ice4','ice5','ice6','beverage','snack1','snack2'];
+
 const KPI_PRESETS = {
+  // ── 실제 아이스크림 무인매장 KPI (ice_zone_kpi / ice_class_kpi 실측 데이터) ──
+  icecream: {
+    label: '🍦 아이스크림 무인매장',
+    desc:  '실측 데이터 기반 | 전환율 ~73% | 평균 구매액 1,919원',
+    // 실측 고객 비율: 성년남 49%, 성년여 26%, 미성년여 17%, 미성년남 9%
+    spawnRate:    2,
+    classRatios:  { adult_male: 49, adult_female: 26, minor_male: 9, minor_female: 16 },
+    speed:        1.0,
+    dwellScale:   1.0,
+    purchaseBonus: 0.0,  // 구역별 실측 전환율 직접 사용
+    dailyVisitors: 35,
+    operatingHours: 16,
+    weekendBoost: 1.20,
+    availableZones: ALL_ZONE_IDS_CONST,
+    convRate:     73,
+    avgBasket:    1919,
+  },
   convenience: {
     label: '편의점',
     desc:  '일 방문객 ~300명 | 구매 전환율 ~88% | 평균 구매액 4,500원',
-    // 한국 편의점(GS25/CU 평균): 남성 55%, 여성 45%, 20-30대 집중
     spawnRate:    5,
     classRatios:  { adult_male: 38, adult_female: 32, minor_male: 17, minor_female: 13 },
-    speed:        1.4,   // 목적 구매, 빠른 동선
-    dwellScale:   0.65,  // 매대 체류 짧음
-    purchaseBonus: 0.18, // 높은 전환율
+    speed:        1.4,
+    dwellScale:   0.65,
+    purchaseBonus: 0.18,
     dailyVisitors: 300,
     operatingHours: 16,
     weekendBoost: 1.05,
-    availableZones: ['snack', 'beverage', 'daily', 'frozen'],  // 편의점: 과자, 음료, 생활용품, 냉동만
+    availableZones: ALL_ZONE_IDS_CONST,
     convRate:     88,
     avgBasket:    4500,
   },
   supermarket: {
     label: '슈퍼마켓',
     desc:  '일 방문객 ~500명 | 구매 전환율 ~74% | 평균 구매액 18,000원',
-    // 한국 슈퍼마켓: 주부 비중 높음, 30-40대 중심
     spawnRate:    3,
     classRatios:  { adult_male: 27, adult_female: 48, minor_male: 12, minor_female: 13 },
     speed:        1.0,
@@ -616,41 +671,9 @@ const KPI_PRESETS = {
     dailyVisitors: 500,
     operatingHours: 12,
     weekendBoost: 1.25,
-    availableZones: ['snack', 'beverage', 'daily', 'cosmetic', 'frozen', 'premium', 'bakery'],  // 슈퍼: 문구 제외
+    availableZones: ALL_ZONE_IDS_CONST,
     convRate:     74,
     avgBasket:    18000,
-  },
-  mall: {
-    label: '쇼핑몰/복합매장',
-    desc:  '일 방문객 ~800명 | 구매 전환율 ~38% | 평균 구매액 35,000원',
-    // 쇼핑몰: 20-30대 여성 중심, 탐색형 소비
-    spawnRate:    4,
-    classRatios:  { adult_male: 22, adult_female: 48, minor_male: 15, minor_female: 15 },
-    speed:        0.75,
-    dwellScale:   1.9,
-    purchaseBonus: -0.18,
-    dailyVisitors: 800,
-    operatingHours: 10,
-    weekendBoost: 1.40,
-    availableZones: ['snack', 'beverage', 'daily', 'cosmetic', 'stationery', 'frozen', 'premium', 'bakery'],  // 쇼핑몰: 전체
-    convRate:     38,
-    avgBasket:    35000,
-  },
-  school: {
-    label: '학교 앞 문구/분식',
-    desc:  '일 방문객 ~200명 | 구매 전환율 ~80% | 평균 구매액 3,500원',
-    // 하교 후 집중: 미성년 비율 80%, 빠른 구매 결정
-    spawnRate:    5,
-    classRatios:  { adult_male: 8, adult_female: 12, minor_male: 40, minor_female: 40 },
-    speed:        1.35,
-    dwellScale:   0.75,
-    purchaseBonus: 0.12,
-    dailyVisitors: 200,
-    operatingHours: 6,
-    weekendBoost: 0.30,
-    availableZones: ['snack', 'beverage', 'stationery', 'bakery'],  // 학교앞: 과자, 음료, 문구, 빵만
-    convRate:     80,
-    avgBasket:    3500,
   },
 };
 
@@ -671,8 +694,15 @@ export default function RetailDashboard() {
     spawnTimer:    0,
     simSecs:       0,
     allPurchases:  [],
+    visitLogs:     [],
     totalVisitors: 0,  // 누적 입장 고객 수 (KPI용)
-    heatGrids: {
+    liveHeatGrids: {
+      adult_male:   new Float32Array(HEAT_W * HEAT_H),
+      adult_female: new Float32Array(HEAT_W * HEAT_H),
+      minor_male:   new Float32Array(HEAT_W * HEAT_H),
+      minor_female: new Float32Array(HEAT_W * HEAT_H),
+    },
+    cumulativeHeatGrids: {
       adult_male:   new Float32Array(HEAT_W * HEAT_H),
       adult_female: new Float32Array(HEAT_W * HEAT_H),
       minor_male:   new Float32Array(HEAT_W * HEAT_H),
@@ -693,7 +723,7 @@ export default function RetailDashboard() {
   const [heatmapMode,  setHeatmapMode]  = useState('combined');
   const [barrierMode,  setBarrierMode]  = useState(false);
   const [barrierCount, setBarrierCount] = useState(0);
-  const [kpiPreset,    setKpiPreset]    = useState('supermarket');
+  const [kpiPreset,    setKpiPreset]    = useState('icecream');
   const [stats, setStats] = useState({
     counts:        { adult_male:0, adult_female:0, minor_male:0, minor_female:0 },
     total:         0,
@@ -723,7 +753,7 @@ export default function RetailDashboard() {
   const [showAdvanced,   setShowAdvanced]   = useState(false);
 
   // 배치 시뮬레이션 상태
-  const [activeTab,     setActiveTab]     = useState('simulation'); // 'simulation' | 'analytics'
+  const [activeTab,     setActiveTab]     = useState('simulation'); // 'simulation' | 'data' | 'ai' | 'validation'
   const [batchStatus,   setBatchStatus]   = useState('idle');       // 'idle' | 'running' | 'done'
   const [batchProgress, setBatchProgress] = useState(0);
   const [batchData,     setBatchData]     = useState(null);
@@ -754,6 +784,7 @@ export default function RetailDashboard() {
     setClassRatios({ ...p.classRatios });
     setSpeed(p.speed);
     setKpiPreset(presetKey);
+    localStorage.setItem('lastStoreType', presetKey);
     // 커스텀 파라미터 동기화
     setDailyVisitors(p.dailyVisitors);
     setOperatingHours(p.operatingHours);
@@ -764,8 +795,8 @@ export default function RetailDashboard() {
     setIsCustom(false);
   }, []);
 
-  // 최초 마운트 시 기본 프리셋 적용
-  useEffect(() => { applyPreset('supermarket'); }, []);
+  // 최초 마운트 시 아이스크림 무인매장 프리셋 적용
+  useEffect(() => { applyPreset('icecream'); }, []);
 
   // offscreen 히트맵 캔버스 초기화
   useEffect(() => {
@@ -776,7 +807,7 @@ export default function RetailDashboard() {
 
   // ── 통계 계산 ────────────────────────────────────────────────────────────
   const computeStats = useCallback(() => {
-    const { agents, allPurchases, simSecs, totalVisitors } = simRef.current;
+    const { agents, allPurchases, visitLogs, simSecs, totalVisitors } = simRef.current;
 
     const counts = { adult_male:0, adult_female:0, minor_male:0, minor_female:0 };
     let checkoutCnt = 0;
@@ -801,15 +832,16 @@ export default function RetailDashboard() {
     const rev = {};
     allPurchases.forEach(p => rev[p.classType] = (rev[p.classType]||0) + p.price);
     const revByClass = CLASS_KEYS.map(cls => ({
-      name:  CUSTOMER_CLASSES[cls].short,
-      value: rev[cls] || 0,
-      color: CUSTOMER_CLASSES[cls].color,
+      name:      CUSTOMER_CLASSES[cls].short,
+      classType: cls,
+      value:     rev[cls] || 0,
+      color:     CUSTOMER_CLASSES[cls].color,
     }));
     const totalRev = Object.values(rev).reduce((s,v) => s+v, 0);
 
     // 매대별 평균 체류
     const dwS = {}, dwC = {};
-    allPurchases.forEach(p => {
+    visitLogs.forEach(p => {
       dwS[p.zoneId] = (dwS[p.zoneId]||0) + (p.dwellTime||0);
       dwC[p.zoneId] = (dwC[p.zoneId]||0) + 1;
     });
@@ -890,12 +922,7 @@ export default function RetailDashboard() {
       const zoneVisitMap = {};
       const zonePurchaseMap = {};
       allPurchases.forEach(p => { zonePurchaseMap[p.zoneLabel] = (zonePurchaseMap[p.zoneLabel]||0)+1; });
-      agents.forEach(a => {
-        (a.visitedZones||[]).forEach(zid => {
-          const z = ZONES.find(z=>z.id===zid);
-          if (z) zoneVisitMap[z.label] = (zoneVisitMap[z.label]||0)+1;
-        });
-      });
+      visitLogs.forEach(v => { zoneVisitMap[v.zoneLabel] = (zoneVisitMap[v.zoneLabel]||0)+1; });
       const lowConvZones = Object.entries(zoneVisitMap)
         .filter(([label, visits]) => visits >= 5)
         .map(([label, visits]) => {
@@ -982,9 +1009,9 @@ export default function RetailDashboard() {
       // ── 운영 효율 ────────────────────────────────────────────────────────
       // [11] 계산대 혼잡도
       if (checkoutCnt > 4) {
-        insights.push(`계산대 혼잡 (${checkoutCnt}명 대기) → 추가 계산대 운영 또는 셀프계산대 도입 검토`);
+        insights.push(`키오스크 혼잡 (${checkoutCnt}명 대기) → 키오스크 추가 설치 검토`);
       } else if (checkoutCnt === 0 && total > 5) {
-        insights.push(`계산대 대기 없음 (매장 내 ${total}명) → 현재 계산대 운영 인력 효율적, 피크 시간 대비 인력 배치 최적화 유지`);
+        insights.push(`키오스크 대기 없음 (매장 내 ${total}명) → 현재 키오스크 대수로 피크 대응 충분`);
       }
 
       // [12] 피크/비피크: 현재 혼잡도 vs 전체 평균
@@ -1016,13 +1043,14 @@ export default function RetailDashboard() {
     const mode = heatmapModeRef.current;
     const oc   = heatOffRef.current;
     if (!oc) return;
+    const heatGrids = sim.liveHeatGrids || sim.cumulativeHeatGrids;
 
     let grid;
     if (mode === 'combined') {
       grid = new Float32Array(HEAT_W * HEAT_H);
-      for (const cls of CLASS_KEYS) { const s = sim.heatGrids[cls]; for (let i=0;i<grid.length;i++) grid[i]+=s[i]; }
+      for (const cls of CLASS_KEYS) { const s = heatGrids[cls]; for (let i=0;i<grid.length;i++) grid[i]+=s[i]; }
     } else {
-      grid = sim.heatGrids[mode];
+      grid = heatGrids[mode];
     }
     let maxVal = 0;
     for (let i=0;i<grid.length;i++) if (grid[i]>maxVal) maxVal=grid[i];
@@ -1086,7 +1114,7 @@ export default function RetailDashboard() {
       ctx.fillStyle = '#1a2e1a'; ctx.strokeStyle = '#3a6a3a'; ctx.lineWidth = 2;
       ctx.fillRect(co.x, co.y, co.w, co.h); ctx.strokeRect(co.x, co.y, co.w, co.h);
       ctx.fillStyle = '#70c070'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(`계산대${i+1}`, co.x + co.w/2, co.y + co.h/2 + 4);
+      ctx.fillText(`키오스크${i+1}`, co.x + co.w/2, co.y + co.h/2 + 4);
     });
 
     // 입구/출구
@@ -1173,7 +1201,7 @@ export default function RetailDashboard() {
 
     // 에이전트 업데이트
     for (const a of sim.agents) {
-      if (a.state !== 'removed') stepAgent(a, sim.agents, sim.allPurchases, sim.simSecs, dt);
+      if (a.state !== 'removed') stepAgent(a, sim.agents, sim.allPurchases, sim.visitLogs, sim.simSecs, dt);
     }
 
     // 제거된 에이전트 정리 (120프레임마다)
@@ -1182,7 +1210,7 @@ export default function RetailDashboard() {
     // 히트맵 감쇠 (60프레임마다 = ~1초 간격)
     if (sim.tick % 60 === 0) {
       for (const key of CLASS_KEYS) {
-        const g = sim.heatGrids[key];
+        const g = sim.liveHeatGrids[key];
         for (let i = 0, len = g.length; i < len; i++) g[i] *= 0.97;
       }
     }
@@ -1193,8 +1221,12 @@ export default function RetailDashboard() {
       const hcx = Math.floor(a.x / 4), hcy = Math.floor(a.y / 4);
       for (const { dx, dy, w } of GAUSS_OFFSETS) {
         const nx = hcx + dx, ny = hcy + dy;
-        if (nx >= 0 && nx < HEAT_W && ny >= 0 && ny < HEAT_H)
-          sim.heatGrids[a.classType][ny * HEAT_W + nx] += 0.06 * w;
+        if (nx >= 0 && nx < HEAT_W && ny >= 0 && ny < HEAT_H) {
+          const idx = ny * HEAT_W + nx;
+          const inc = 0.06 * w;
+          sim.liveHeatGrids[a.classType][idx] += inc;
+          sim.cumulativeHeatGrids[a.classType][idx] += inc;
+        }
       }
     }
 
@@ -1297,10 +1329,10 @@ export default function RetailDashboard() {
         CLASS_KEYS_LOCAL.forEach(cls => {
           if (data.heatGrids[cls]) heatGridsRestored[cls] = data.heatGrids[cls];
         });
-        setBatchData({ ...data, heatGrids: heatGridsRestored });
+        setBatchData({ ...data, heatGrids: heatGridsRestored, storeType: kpiPreset });
         setBatchStatus('done');
         setBatchProgress(100);
-        setActiveTab('analytics');
+        setActiveTab('data');
         worker.terminate();
         workerRef.current = null;
       } else if (data.type === 'error') {
@@ -1327,8 +1359,11 @@ export default function RetailDashboard() {
   const handleReset = () => {
     const sim = simRef.current;
     sim.running = false; sim.agents = []; sim.tick = 0;
-    sim.spawnTimer = 0; sim.simSecs = 0; sim.allPurchases = []; sim.totalVisitors = 0;
-    for (const cls of CLASS_KEYS) sim.heatGrids[cls] = new Float32Array(HEAT_W * HEAT_H);
+    sim.spawnTimer = 0; sim.simSecs = 0; sim.allPurchases = []; sim.visitLogs = []; sim.totalVisitors = 0;
+    for (const cls of CLASS_KEYS) {
+      sim.liveHeatGrids[cls] = new Float32Array(HEAT_W * HEAT_H);
+      sim.cumulativeHeatGrids[cls] = new Float32Array(HEAT_W * HEAT_H);
+    }
     _customBarriers.length = 0;
     _pfDirty = true; _pfGrid = null;
     _uid = 0;
@@ -1337,7 +1372,7 @@ export default function RetailDashboard() {
     setStats({ counts:{ adult_male:0,adult_female:0,minor_male:0,minor_female:0 }, total:0, checkoutCnt:0, topZones:[], revByClass:[], dwellByZone:[], insights:[], simTime:'00:00', totalRev:0,
                totalVisitors:0, convRate:0, avgBasket:0, revenuePerHr:0 });
     const ctx = canvasRef.current?.getContext('2d');
-    if (ctx) { ctx.fillStyle = '#0f0f1e'; ctx.fillRect(0,0,CANVAS_W,CANVAS_H); }
+    if (ctx) { ctx.fillStyle = '#f7f8fa'; ctx.fillRect(0,0,CANVAS_W,CANVAS_H); }
   };
 
   // ── CSV 다운로드 ──────────────────────────────────────────────────────────
@@ -1367,7 +1402,7 @@ export default function RetailDashboard() {
     const header = '매대,' + CLASS_KEYS.map(cls => CUSTOMER_CLASSES[cls].short).join(',') + '\n';
     const rows = ZONES.map(z => {
       const cols = CLASS_KEYS.map(cls => {
-        const p = simRef.current.allPurchases.filter(x => x.classType === cls && x.zoneId === z.id);
+        const p = simRef.current.visitLogs.filter(x => x.classType === cls && x.zoneId === z.id);
         return p.length ? (p.reduce((s,x)=>s+(x.dwellTime||0),0)/p.length).toFixed(1) : 0;
       });
       return `${z.label},${cols.join(',')}`;
@@ -1395,9 +1430,9 @@ export default function RetailDashboard() {
       let grid;
       if (mode === 'combined') {
         grid = new Float32Array(HEAT_W*HEAT_H);
-        for (const cls of CLASS_KEYS) { const s=sim.heatGrids[cls]; for(let i=0;i<grid.length;i++) grid[i]+=s[i]; }
+        for (const cls of CLASS_KEYS) { const s=sim.cumulativeHeatGrids[cls]; for(let i=0;i<grid.length;i++) grid[i]+=s[i]; }
       } else {
-        grid = sim.heatGrids[mode];
+        grid = sim.cumulativeHeatGrids[mode];
       }
       let maxV = 0; for (let i=0;i<grid.length;i++) if(grid[i]>maxV) maxV=grid[i];
       if (maxV > 0) {
@@ -1443,7 +1478,7 @@ export default function RetailDashboard() {
         const mCtx = miniOc.getContext('2d');
         mCtx.fillStyle='#0f0f1e'; mCtx.fillRect(0,0,CANVAS_W,CANVAS_H);
         const sim  = simRef.current;
-        const grid = sim.heatGrids[cls];
+        const grid = sim.cumulativeHeatGrids[cls];
         let maxV=0; for(let i=0;i<grid.length;i++) if(grid[i]>maxV) maxV=grid[i];
         if (maxV > 0) {
           const id = mCtx.createImageData(HEAT_W,HEAT_H);
@@ -1469,107 +1504,104 @@ export default function RetailDashboard() {
 
   // ── 렌더 ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display:'flex', height:'100vh', minWidth:'1200px', background:'#0a0a18', color:'#e0e0ff', fontFamily:'system-ui,sans-serif', overflow:'hidden' }}>
+    <div className="flex flex-col h-screen bg-bg text-text overflow-hidden" style={{ minWidth: '1200px' }}>
+
+      {/* ── 상단 탭바 ── */}
+      <header className="flex items-center h-12 bg-white border-b border-border/60 px-4 gap-1 shrink-0"
+        style={{ boxShadow: '0 1px 0 rgba(109,92,231,0.08)' }}>
+        <div className="flex items-center gap-2 mr-4">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #6d5ce7, #a78bfa)' }}>
+            <ShoppingCart className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-sm font-bold text-text whitespace-nowrap">아이스크림 무인매장</span>
+        </div>
+        <div className="w-px h-5 bg-border mx-1" />
+        {[
+          { id: 'simulation', label: '시뮬레이션', icon: Activity },
+          ...(batchData ? [
+            { id: 'data',       label: 'KPI 분석',  icon: BarChart2   },
+            { id: 'ai',         label: 'AI 예측',   icon: Brain       },
+            { id: 'validation', label: '모델 검증', icon: FlaskConical },
+          ] : []),
+        ].map(({ id, label, icon: Icon }) => (
+          <button key={id} onClick={() => setActiveTab(id)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === id ? 'bg-accent-light text-accent' : 'text-text-muted hover:text-text hover:bg-gray-100'
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />{label}
+          </button>
+        ))}
+        <div className="flex-1" />
+        <a href="/model" target="_blank" rel="noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-muted hover:text-accent hover:bg-accent-light transition-colors">
+          <Brain className="w-3.5 h-3.5" />AI 모델 성능<ExternalLink className="w-3 h-3" />
+        </a>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden">
 
       {/* ── 좌측 사이드바 ── */}
-      <aside style={{ width:'280px', flexShrink:0, background:'#10101e', borderRight:'1px solid #222244', overflowY:'auto', padding:'12px', display:'flex', flexDirection:'column', gap:'10px' }}>
-        <div style={{ textAlign:'center', fontSize:'15px', fontWeight:'bold', color:'#b0b0e0', padding:'6px 0 2px' }}>
-          🏪 매장 시뮬레이션
+      <aside className="w-64 shrink-0 border-r border-border/60 overflow-y-auto p-3 space-y-2"
+        style={{ background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 70%, #efedfd55 100%)' }}>
+        <div className="text-xs font-semibold px-2 py-1 mb-1 rounded-lg"
+          style={{ background: 'linear-gradient(90deg, #6d5ce7, #8b7bf0)', color: '#fff', letterSpacing: '0.06em' }}>
+          매장 설정
         </div>
 
         {/* KPI 프리셋 */}
-        <Card>
-          <SecTitle>📊 업태 KPI 프리셋</SecTitle>
-          <div style={{ display:'flex', flexDirection:'column', gap:'5px', marginTop:'4px' }}>
+        <Accordion title="업태 KPI 프리셋" icon={BarChart2} defaultOpen={true}>
+          <div className="flex flex-col gap-1.5">
             {Object.entries(KPI_PRESETS).map(([key, p]) => (
               <button key={key} onClick={() => applyPreset(key)}
-                style={{
-                  background: kpiPreset === key ? '#1e2e4a' : '#12121e',
-                  color: kpiPreset === key ? '#80b0ff' : '#8080aa',
-                  border: `1px solid ${kpiPreset === key ? '#3a5aaa' : '#222244'}`,
-                  borderRadius:'4px', padding:'6px 8px', cursor:'pointer',
-                  textAlign:'left', fontSize:'11px',
-                }}>
-                <div style={{ fontWeight:'bold', marginBottom:'2px' }}>{p.label}</div>
-                <div style={{ fontSize:'10px', opacity:0.8 }}>{p.desc}</div>
+                className={`w-full text-left px-2.5 py-2 rounded-lg text-xs border transition-colors ${
+                  kpiPreset === key
+                    ? 'nav-active'
+                    : 'bg-gray-50 border-border text-text-muted hover:bg-gray-100'
+                }`}>
+                <div className="font-semibold">{p.label}</div>
+                <div className="opacity-75 mt-0.5">{p.desc}</div>
               </button>
             ))}
           </div>
-        </Card>
+        </Accordion>
 
-        {/* 매장 파라미터 커스텀 */}
-        <Card>
-          <SecTitle style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-            <span>매장 파라미터</span>
-            {isCustom && <span style={{ fontSize:'9px', color:'#ffaa40', background:'#2a1a0a', padding:'1px 6px', borderRadius:'8px' }}>커스텀</span>}
-          </SecTitle>
-          <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginTop:'6px' }}>
-            {/* 일 방문객 수 */}
+        {/* 매장 파라미터 */}
+        <Accordion title={<span className="flex items-center gap-1">매장 파라미터{isCustom && <span className="badge bg-amber-100 text-amber-700 ml-1">커스텀</span>}</span>} icon={Settings} defaultOpen={true}>
+          <div className="flex flex-col gap-3">
             <div>
-              <div style={{ fontSize:'10px', color:'#8080aa', marginBottom:'3px' }}>일 방문객 수</div>
-              <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+              <div className="text-xs text-text-muted mb-1">일 방문객 수</div>
+              <div className="flex items-center gap-2">
                 <input type="number" min={50} max={5000} step={50} value={dailyVisitors}
                   onChange={e => { setDailyVisitors(Math.max(50, +e.target.value || 50)); setIsCustom(true); setKpiPreset(null); }}
-                  style={{ width:'70px', background:'#12121e', color:'#e0e0ff', border:'1px solid #333366', borderRadius:'3px', padding:'3px 6px', fontSize:'12px', textAlign:'right' }}
+                  className="w-20 bg-white text-text border border-border rounded-lg px-2 py-1 text-sm text-right"
                 />
-                <span style={{ fontSize:'11px', color:'#8080aa' }}>명/일</span>
+                <span className="text-xs text-text-muted">명/일</span>
               </div>
             </div>
-            {/* 영업시간 */}
-            <div>
-              <div style={{ fontSize:'10px', color:'#8080aa', marginBottom:'3px' }}>영업시간: {operatingHours}시간</div>
-              <input type="range" min={4} max={24} step={1} value={operatingHours}
-                onChange={e => { setOperatingHours(+e.target.value); setIsCustom(true); setKpiPreset(null); }}
-                style={{ width:'100%', accentColor:'#5a7aff' }}
-              />
-              <div style={{ display:'flex', justifyContent:'space-between', fontSize:'9px', color:'#606080' }}>
-                <span>4h</span><span>24h</span>
-              </div>
-            </div>
-            {/* 고급 설정 토글 */}
+            <SliderRow label={`영업시간: ${operatingHours}시간`} min={4} max={24} step={1} value={operatingHours}
+              onChange={v => { setOperatingHours(v); setIsCustom(true); setKpiPreset(null); }} />
             <button onClick={() => setShowAdvanced(v => !v)}
-              style={{ background:'none', border:'none', color:'#6080cc', cursor:'pointer', fontSize:'11px', textAlign:'left', padding:'2px 0' }}>
-              {showAdvanced ? '▼' : '▶'} 고급 설정
+              className="flex items-center gap-1 text-xs text-accent cursor-pointer bg-transparent border-none p-0">
+              {showAdvanced ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}고급 설정
             </button>
             {showAdvanced && (
-              <div style={{ display:'flex', flexDirection:'column', gap:'8px', padding:'6px', background:'#0a0a16', borderRadius:'4px', border:'1px solid #1a1a3a' }}>
-                {/* 체류시간 배율 */}
+              <div className="flex flex-col gap-2 p-2.5 bg-gray-50 rounded-lg border border-border">
+                <SliderRow label={`체류시간 배율: ${dwellScale.toFixed(2)}x`} min={0.3} max={3.0} step={0.05} value={dwellScale}
+                  onChange={v => { setDwellScale(v); setIsCustom(true); setKpiPreset(null); }} />
+                <SliderRow label={`구매확률 보정: ${purchaseBonus >= 0 ? '+' : ''}${(purchaseBonus * 100).toFixed(0)}%`} min={-0.3} max={0.3} step={0.01} value={purchaseBonus}
+                  onChange={v => { setPurchaseBonus(v); setIsCustom(true); setKpiPreset(null); }} />
+                <SliderRow label={`주말 배율: ${weekendBoost.toFixed(2)}x`} min={0.1} max={2.0} step={0.05} value={weekendBoost}
+                  onChange={v => { setWeekendBoost(v); setIsCustom(true); setKpiPreset(null); }} />
                 <div>
-                  <div style={{ fontSize:'10px', color:'#8080aa', marginBottom:'2px' }}>체류시간 배율: {dwellScale.toFixed(2)}x</div>
-                  <input type="range" min={0.3} max={3.0} step={0.05} value={dwellScale}
-                    onChange={e => { setDwellScale(+e.target.value); setIsCustom(true); setKpiPreset(null); }}
-                    style={{ width:'100%', accentColor:'#5a7aff' }}
-                  />
-                </div>
-                {/* 구매확률 보정 */}
-                <div>
-                  <div style={{ fontSize:'10px', color:'#8080aa', marginBottom:'2px' }}>구매확률 보정: {purchaseBonus >= 0 ? '+' : ''}{(purchaseBonus * 100).toFixed(0)}%</div>
-                  <input type="range" min={-0.3} max={0.3} step={0.01} value={purchaseBonus}
-                    onChange={e => { setPurchaseBonus(+e.target.value); setIsCustom(true); setKpiPreset(null); }}
-                    style={{ width:'100%', accentColor:'#5a7aff' }}
-                  />
-                </div>
-                {/* 주말 배율 */}
-                <div>
-                  <div style={{ fontSize:'10px', color:'#8080aa', marginBottom:'2px' }}>주말 배율: {weekendBoost.toFixed(2)}x</div>
-                  <input type="range" min={0.1} max={2.0} step={0.05} value={weekendBoost}
-                    onChange={e => { setWeekendBoost(+e.target.value); setIsCustom(true); setKpiPreset(null); }}
-                    style={{ width:'100%', accentColor:'#5a7aff' }}
-                  />
-                </div>
-                {/* 활성 구역 */}
-                <div>
-                  <div style={{ fontSize:'10px', color:'#8080aa', marginBottom:'4px' }}>매장 구역 ({availableZones.length}/{ZONES.length})</div>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'2px' }}>
+                  <div className="text-xs text-text-muted mb-1.5">매장 구역 ({availableZones.length}/{ZONES.length})</div>
+                  <div className="grid grid-cols-2 gap-1">
                     {ZONES.map(z => (
-                      <label key={z.id} style={{ fontSize:'10px', color: availableZones.includes(z.id) ? '#c0c0e0' : '#505070', cursor:'pointer', display:'flex', alignItems:'center', gap:'3px' }}>
+                      <label key={z.id} className="flex items-center gap-1 text-xs cursor-pointer text-text">
                         <input type="checkbox" checked={availableZones.includes(z.id)}
-                          onChange={e => {
-                            setAvailableZones(prev => e.target.checked ? [...prev, z.id] : prev.filter(id => id !== z.id));
-                            setIsCustom(true); setKpiPreset(null);
-                          }}
-                          style={{ accentColor:'#5a7aff', width:'12px', height:'12px' }}
-                        />
+                          onChange={e => { setAvailableZones(prev => e.target.checked ? [...prev, z.id] : prev.filter(id => id !== z.id)); setIsCustom(true); setKpiPreset(null); }}
+                          className="accent-accent w-3 h-3" />
                         {z.label}
                       </label>
                     ))}
@@ -1578,211 +1610,289 @@ export default function RetailDashboard() {
               </div>
             )}
           </div>
-        </Card>
+        </Accordion>
+
+        {/* 분석 결과 탭 — 배치 완료 후 표시 */}
+        {batchData && activeTab !== 'simulation' && (
+          <Btn onClick={() => setActiveTab('simulation')} variant="default">
+            <Activity className="w-3.5 h-3.5" />시뮬레이션으로
+          </Btn>
+        )}
 
         {/* 배치 시뮬레이션 */}
-        <Card>
-          <SecTitle>🚀 4개월 배치 시뮬레이션</SecTitle>
+        <Accordion title="4개월 배치 시뮬레이션" icon={TrendingUp} defaultOpen={true}>
           <Btn
-            bg={batchStatus === 'running' ? '#4a1a1a' : batchStatus === 'done' ? '#1a3a2a' : '#1a2a4a'}
             onClick={handleRunBatch}
+            variant={batchStatus === 'running' ? 'danger' : batchStatus === 'done' ? 'success' : 'primary'}
           >
-            {batchStatus === 'running'
-              ? `⏹ 중단 (${batchProgress}%)`
-              : batchStatus === 'done'
-              ? '🔄 재실행 (120일)'
-              : '▶ 120일 배치 실행'}
+            <TrendingUp className="w-3.5 h-3.5" />
+            {batchStatus === 'running' ? `중단 (${batchProgress}%)` : batchStatus === 'done' ? '재실행 (120일)' : '120일 배치 실행'}
           </Btn>
           {batchStatus === 'running' && (
-            <div style={{ marginTop: '8px' }}>
-              <div style={{ height: '5px', background: '#1a1a2a', borderRadius: '3px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${batchProgress}%`, background: 'linear-gradient(90deg,#3a7aff,#7a3aff)', borderRadius: '3px', transition: 'width 0.3s' }} />
+            <div className="mt-2">
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-accent rounded-full transition-all duration-300" style={{ width: `${batchProgress}%` }} />
               </div>
-              <div style={{ fontSize: '10px', color: '#6060aa', marginTop: '3px', textAlign: 'center' }}>{batchProgress}% 완료</div>
+              <div className="text-xs text-text-muted mt-1 text-center">{batchProgress}% 완료</div>
             </div>
           )}
           {batchStatus === 'done' && (
-            <div style={{ fontSize: '11px', color: '#40cc80', marginTop: '5px' }}>
-              ✓ 완료! 분석 탭에서 결과 확인
+            <div className="text-xs text-ok mt-2 flex items-center gap-1">
+              <Activity className="w-3 h-3" />완료 — 상단 탭에서 분석 결과 확인
             </div>
           )}
-          {batchData && (
-            <button onClick={() => setActiveTab(t => t === 'analytics' ? 'simulation' : 'analytics')}
-              style={{ marginTop: '6px', width: '100%', background: activeTab === 'analytics' ? '#2a1a4a' : '#1a1a3a', color: activeTab === 'analytics' ? '#b080ff' : '#8080aa', border: '1px solid #2a2a5a', borderRadius: '4px', padding: '5px', cursor: 'pointer', fontSize: '11px' }}>
-              {activeTab === 'analytics' ? '📺 시뮬레이션 탭으로' : '📊 분석 탭으로'}
-            </button>
-          )}
-        </Card>
+        </Accordion>
 
-        {/* 컨트롤 */}
-        <Card>
-          <div style={{ display:'flex', gap:'8px', justifyContent:'center' }}>
-            <Btn bg={running ? '#4a1a5a' : '#1a4a1a'} onClick={handleToggle}>
-              {running ? '⏸ 일시정지' : '▶ 시작'}
-            </Btn>
-            <Btn bg='#2a1a1a' onClick={handleReset}>🔄 리셋</Btn>
+        {/* 시뮬레이션 컨트롤 */}
+        <Accordion title="시뮬레이션 컨트롤" icon={Activity} defaultOpen={true}>
+          <div className="flex gap-2">
+            <button onClick={handleToggle}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                running
+                  ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
+                  : 'bg-green-50 border-green-200 text-ok hover:bg-green-100'
+              }`}>
+              {running ? <><Pause className="w-4 h-4" />일시정지</> : <><Play className="w-4 h-4" />시작</>}
+            </button>
+            <button onClick={handleReset}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-semibold bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-colors">
+              <RotateCcw className="w-4 h-4" />리셋
+            </button>
           </div>
           <SliderRow label={`속도: ${speed}x`} min={0.5} max={5} step={0.5} value={speed} onChange={setSpeed} />
-          <div style={{ fontSize:'11px', color:'#6060aa', textAlign:'center', marginTop:'6px' }}>
-            {stats.simTime} ·&nbsp;매장 내 {stats.total}명 ·&nbsp;누적 {stats.totalVisitors}명
+          <div className="text-xs text-text-muted text-center mt-2">
+            {stats.simTime} · 매장 내 {stats.total}명 · 누적 {stats.totalVisitors}명
           </div>
-        </Card>
+        </Accordion>
 
         {/* 유입 설정 */}
-        <Card>
-          <SecTitle>고객 유입 설정</SecTitle>
+        <Accordion title="고객 유입 설정" icon={Users}>
           <SliderRow label={`유입 속도: ${spawnRate}/분`} min={1} max={10} value={spawnRate} onChange={setSpawnRate} />
-          <div style={{ fontSize:'11px', color:'#6060aa', margin:'8px 0 4px' }}>클래스 비율</div>
+          <div className="text-xs text-text-muted mt-2 mb-1">고객 클래스 비율</div>
           {CLASS_KEYS.map(cls => (
             <SliderRow
               key={cls}
-              label={`${CUSTOMER_CLASSES[cls].icon} ${CUSTOMER_CLASSES[cls].short}: ${classRatios[cls]}%`}
+              label={`${CUSTOMER_CLASSES[cls].short}: ${classRatios[cls]}%`}
               labelColor={CUSTOMER_CLASSES[cls].color}
               min={0} max={100}
               value={classRatios[cls]}
               onChange={v => setClassRatios(r => ({ ...r, [cls]: v }))}
             />
           ))}
-        </Card>
+        </Accordion>
 
         {/* 표시 옵션 */}
-        <Card>
-          <SecTitle>표시 옵션</SecTitle>
-          <CheckRow label='히트맵 오버레이' checked={showHeatmap} onChange={setShowHeatmap} />
-          <CheckRow label='매대 ROI 표시'   checked={showROI}     onChange={setShowROI} />
-          <div style={{ marginTop:'8px' }}>
-            <div style={{ fontSize:'12px', color:'#8080aa', marginBottom:'4px' }}>히트맵 모드</div>
-            <select value={heatmapMode} onChange={e => setHeatmapMode(e.target.value)} style={selectSt}>
-              <option value='combined'>통합</option>
+        <Accordion title="표시 옵션" icon={Layers}>
+          <CheckRow label="히트맵 오버레이" checked={showHeatmap} onChange={setShowHeatmap} />
+          <CheckRow label="매대 ROI 표시"   checked={showROI}     onChange={setShowROI} />
+          <div className="mt-2">
+            <div className="text-xs text-text-muted mb-1">히트맵 모드</div>
+            <select value={heatmapMode} onChange={e => setHeatmapMode(e.target.value)} className={selectSt}>
+              <option value="combined">통합</option>
               {CLASS_KEYS.map(cls => <option key={cls} value={cls}>{CUSTOMER_CLASSES[cls].label}</option>)}
             </select>
           </div>
-        </Card>
+        </Accordion>
 
-        {/* 장애물 설정 */}
-        <Card>
-          <SecTitle>🚧 장애물 설정</SecTitle>
+        {/* 장애물 + 이벤트 */}
+        <Accordion title="장애물 / 이벤트" icon={AlertTriangle}>
           <CheckRow
             label={`장애물 배치 모드${barrierCount > 0 ? ` (${barrierCount}개)` : ''}`}
-            checked={barrierMode}
-            onChange={setBarrierMode}
+            checked={barrierMode} onChange={setBarrierMode}
           />
           {barrierMode && (
-            <div style={{ fontSize:'11px', color:'#ffaa44', marginTop:'4px', lineHeight:'1.5' }}>
-              좌클릭: 장애물 추가/제거<br />
-              우클릭: 장애물 제거
-            </div>
+            <div className="text-xs text-warn mt-1.5">좌클릭: 추가/제거 · 우클릭: 제거</div>
           )}
-          <div style={{ marginTop:'8px' }}>
-            <Btn bg='#2a1a1a' onClick={() => {
-              _customBarriers.length = 0;
-              setBarrierCount(0);
-            }}>
-              🗑 장애물 전체 초기화
+          <div className="flex flex-col gap-1.5 mt-2">
+            <Btn onClick={() => { _customBarriers.length = 0; setBarrierCount(0); }} variant="danger">
+              <RotateCcw className="w-3.5 h-3.5" />장애물 초기화
             </Btn>
-          </div>
-        </Card>
-
-        {/* 이벤트 */}
-        <Card>
-          <SecTitle>이벤트</SecTitle>
-          <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
-            <Btn bg='#3a2a10' onClick={() => setSpawnRate(r => Math.min(10, r + 3))}>🏷 세일 시작 (유입 증가)</Btn>
-            <Btn bg='#102a3a' onClick={() => setSpawnRate(r => Math.max(1, r - 2))}>🌙 한산 시간 (유입 감소)</Btn>
-            <Btn bg='#1a2a1a' onClick={() => {
-              // 계산대 안내 방송 → 쇼핑 중인 에이전트 일부를 checkout으로 전환
+            <Btn onClick={() => setSpawnRate(r => Math.min(10, r + 3))}>
+              <Zap className="w-3.5 h-3.5 text-amber-500" />세일 시작 (유입 증가)
+            </Btn>
+            <Btn onClick={() => setSpawnRate(r => Math.max(1, r - 2))}>
+              <Clock className="w-3.5 h-3.5 text-blue-400" />한산 시간 (유입 감소)
+            </Btn>
+            <Btn onClick={() => {
               simRef.current.agents.forEach(a => {
                 if (a.state === 'shopping' && Math.random() < 0.4) {
                   const co = CHECKOUTS[Math.floor(Math.random() * CHECKOUTS.length)];
-                  a.state = 'checkout';
-                  a.currentZone = null;
-                  a.targetX = co.x + co.w/2;
-                  a.targetY = co.y + co.h/2;
+                  a.state = 'checkout'; a.currentZone = null;
+                  a.targetX = co.x + co.w/2; a.targetY = co.y + co.h/2;
                 }
               });
-            }}>📢 안내 방송 (계산대 유도)</Btn>
+            }}>
+              <Activity className="w-3.5 h-3.5 text-green-500" />안내 방송 (계산대 유도)
+            </Btn>
           </div>
-        </Card>
+        </Accordion>
       </aside>
 
       {/* ── 중앙: 탭 전환 (Canvas / 배치 분석) ── */}
       {activeTab === 'simulation' ? (
-        <main style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', padding:'10px', overflow:'hidden' }}>
+        <main className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden gap-3 bg-bg">
+          {/* 상태 표시 바 */}
+          <div className="flex items-center gap-3 bg-white border border-border rounded-xl px-4 py-2 w-full shadow-sm" style={{ maxWidth: `${CANVAS_W}px` }}>
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${running ? 'bg-ok' : 'bg-gray-300'}`}
+                style={{ boxShadow: running ? '0 0 5px #16a34a' : 'none' }} />
+              <span className={`text-xs font-semibold ${running ? 'text-ok' : 'text-text-muted'}`}>
+                {running ? '실행 중' : '정지'}
+              </span>
+            </div>
+            <div className="w-px h-3.5 bg-border" />
+            <span className="text-xs text-text-muted flex items-center gap-1"><Clock className="w-3 h-3" />{stats.simTime}</span>
+            <span className="text-xs text-text-muted flex items-center gap-1"><Users className="w-3 h-3" />매장 내 {stats.total}명</span>
+            <span className="text-xs text-text-muted">{speed}x</span>
+            {barrierMode && <span className="text-xs font-semibold text-danger flex items-center gap-1"><AlertTriangle className="w-3 h-3" />장애물 배치 모드</span>}
+          </div>
           <canvas
             ref={canvasRef}
             width={CANVAS_W}
             height={CANVAS_H}
             onClick={handleCanvasClick}
             onContextMenu={handleCanvasContextMenu}
+            className="rounded-xl shadow-md object-contain"
             style={{
-              border: barrierMode ? '2px solid #ff4444' : '1px solid #222244',
-              borderRadius:'6px', maxWidth:'100%', maxHeight:'100%', objectFit:'contain',
+              border: barrierMode ? '2px solid #dc2626' : '1px solid #e5e7eb',
+              maxWidth: '100%',
+              maxHeight: 'calc(100% - 52px)',
               cursor: barrierMode ? 'crosshair' : 'default',
             }}
           />
         </main>
       ) : (
-        /* 분석 탭: Canvas + 우측 패널 영역 전체 사용 */
-        <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
-          <div style={{ padding:'8px 14px 0', background:'#0a0a18', borderBottom:'1px solid #1a1a30', display:'flex', alignItems:'center', gap:'12px' }}>
-            <div style={{ fontSize:'13px', fontWeight:'bold', color:'#b0b0e0' }}>📊 {batchData?.dailyStats?.length || 120}일 배치 분석 결과</div>
-            <div style={{ fontSize:'11px', color:'#5050aa' }}>
+        <div className="flex-1 flex flex-col overflow-hidden bg-bg">
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-white border-b border-border">
+            <span className="text-sm font-semibold text-text">
+              {activeTab === 'data' ? 'KPI 분석' : activeTab === 'ai' ? 'AI 예측' : '모델 검증'}
+              {' '}— {batchData?.dailyStats?.length || 120}일 배치 결과
+            </span>
+            <span className="text-xs text-text-muted">
               {batchData ? `총 방문객 ${batchData.totalVisitors?.toLocaleString()}명 · 구매 ${batchData.purchases?.length?.toLocaleString()}건` : ''}
-            </div>
+            </span>
           </div>
-          {batchData && <BatchAnalytics data={batchData} />}
+          {batchData && (
+            <React.Suspense fallback={<div className="p-8 text-text-muted text-sm">분석 모듈을 불러오는 중입니다...</div>}>
+              <BatchAnalytics data={batchData} view={activeTab} />
+            </React.Suspense>
+          )}
         </div>
       )}
 
       {/* ── 우측 패널 (시뮬레이션 탭일 때만) ── */}
       {activeTab !== 'simulation' ? null : (
-      /* ── 우측 패널 ── */
-      <aside style={{ width:'320px', flexShrink:0, background:'#10101e', borderLeft:'1px solid #222244', overflowY:'auto', padding:'12px', display:'flex', flexDirection:'column', gap:'10px' }}>
-        <div style={{ fontSize:'14px', fontWeight:'bold', color:'#b0b0e0' }}>📊 실시간 분석</div>
+      <aside className="w-72 shrink-0 bg-white border-l border-border/60 overflow-y-auto p-3 flex flex-col gap-3">
+        <div className="flex items-center gap-2 pt-1 pb-0.5">
+          <BarChart2 className="w-4 h-4 text-accent" />
+          <span className="text-sm font-bold text-text">실시간 분석</span>
+        </div>
 
-        {/* KPI 지표 */}
-        <Card>
-          <SecTitle>📈 핵심 KPI 지표</SecTitle>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px', marginTop:'6px' }}>
-            {[
-              { label:'누적 방문객',  value: `${stats.totalVisitors}명`,            color:'#7090ff' },
-              { label:'구매 전환율',  value: `${stats.convRate}%`,                   color: stats.convRate >= 60 ? '#40cc80' : stats.convRate >= 30 ? '#ffaa44' : '#ff6060' },
-              { label:'평균 구매액',  value: `₩${(stats.avgBasket||0).toLocaleString()}`, color:'#c080ff' },
-              { label:'시간당 매출',  value: `₩${Math.round((stats.revenuePerHr||0)/1000)}K`, color:'#ffcc44' },
-            ].map(({ label, value, color }) => (
-              <div key={label} style={{ background:'#0e0e22', borderRadius:'5px', padding:'7px 8px', border:'1px solid #1e1e44' }}>
-                <div style={{ fontSize:'10px', color:'#6060aa', marginBottom:'2px' }}>{label}</div>
-                <div style={{ fontSize:'15px', fontWeight:'bold', color }}>{value}</div>
-              </div>
-            ))}
-          </div>
-          {stats.totalVisitors > 0 && (
-            <div style={{ fontSize:'10px', color:'#5050888', marginTop:'6px', textAlign:'center' }}>
-              참조 전환율: {KPI_PRESETS[kpiPreset]?.convRate ?? '-'}% (업태 기준)
+        {/* 매장 상태 배지 */}
+        {(() => {
+          const co = stats.checkoutCnt || 0;
+          const cr = stats.convRate || 0;
+          const tv = stats.totalVisitors || 0;
+          let cls, label;
+          if (co > 4 || (tv > 20 && cr < 20)) {
+            cls = 'bg-red-50 border-red-200 text-danger'; label = '경보';
+          } else if (co > 2 || (tv > 20 && cr < 40)) {
+            cls = 'bg-amber-50 border-amber-200 text-warn'; label = '주의';
+          } else {
+            cls = 'bg-green-50 border-green-200 text-ok'; label = '정상 운영';
+          }
+          return (
+            <div className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-semibold ${cls}`}>
+              <Activity className="w-4 h-4" />매장 상태: {label}
             </div>
-          )}
+          );
+        })()}
+
+        {/* 실시간 경보 */}
+        {(() => {
+          const alerts = [];
+          if (stats.checkoutCnt > 4)
+            alerts.push({ cls:'bg-red-50 border-red-200 text-danger', title:'계산대 혼잡', body:`${stats.checkoutCnt}명 대기 중` });
+          if (stats.convRate < 30 && stats.totalVisitors > 20)
+            alerts.push({ cls:'bg-amber-50 border-amber-200 text-warn', title:'전환율 저조', body:`현재 ${stats.convRate}%` });
+          if (stats.total < 3 && running)
+            alerts.push({ cls:'bg-blue-50 border-blue-200 text-blue-600', title:'매장 한산', body:'재고 정리 타이밍' });
+          if (!alerts.length) return null;
+          return (
+            <div className="flex flex-col gap-1.5">
+              {alerts.map((a, i) => (
+                <div key={i} className={`flex items-start gap-2 px-3 py-2 rounded-lg border text-xs ${a.cls}`}>
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  <div><span className="font-semibold">{a.title}</span> — {a.body}</div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
+        {/* 핵심 KPI */}
+        <Card>
+          <SecTitle><TrendingUp className="w-3.5 h-3.5" />핵심 KPI</SecTitle>
+          {(() => {
+            const preset = KPI_PRESETS[kpiPreset] || {};
+            const targetConv  = preset.convRate ?? 50;
+            const hourlyTarget = ((preset.dailyVisitors || 0) * (preset.avgBasket || 0)) / Math.max(1, preset.operatingHours || 1);
+            const convAchieve  = targetConv > 0 ? (stats.convRate / targetConv) * 100 : 0;
+            const revAchieve   = hourlyTarget > 0 ? ((stats.revenuePerHr || 0) / hourlyTarget) * 100 : 0;
+            const basketTarget = preset.avgBasket || 0;
+            const basketAchieve = basketTarget > 0 ? ((stats.avgBasket || 0) / basketTarget) * 100 : 0;
+
+            const statusCls = (pct) => pct >= 90 ? 'text-ok bg-green-50' : pct >= 60 ? 'text-warn bg-amber-50' : 'text-danger bg-red-50';
+            const statusTxt = (pct) => pct >= 90 ? '달성' : pct >= 60 ? '주의' : '미달';
+
+            const kpis = [
+              { label:'누적 방문객', value:`${stats.totalVisitors}명`, icon: Users, color:'text-accent', sub:null, pct:null },
+              { label:'구매 전환율', value:`${stats.convRate}%`,       icon: ShoppingCart,
+                color: stats.convRate >= 60 ? 'text-ok' : stats.convRate >= 30 ? 'text-warn' : 'text-danger',
+                sub:`목표 ${targetConv}%`, pct: stats.totalVisitors > 10 ? convAchieve : null },
+              { label:'평균 구매액', value:`₩${(stats.avgBasket||0).toLocaleString()}`, icon: DollarSign, color:'text-violet-600',
+                sub: basketTarget ? `목표 ₩${basketTarget.toLocaleString()}` : null, pct: stats.totalVisitors > 10 ? basketAchieve : null },
+              { label:'시간당 매출', value:`₩${Math.round((stats.revenuePerHr||0)/1000)}K`, icon: TrendingUp, color:'text-amber-600',
+                sub: hourlyTarget > 0 ? `달성률 ${Math.round(revAchieve)}%` : null, pct: stats.totalVisitors > 10 && hourlyTarget > 0 ? revAchieve : null },
+            ];
+            return (
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                {kpis.map(({ label, value, icon: Icon, color, sub, pct }) => (
+                  <div key={label} className="bg-surface rounded-xl border border-border/60 p-2.5"
+                    style={{ boxShadow: '0 1px 2px rgba(16,24,40,0.03)' }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-accent-light text-accent flex items-center justify-center shrink-0">
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-xs text-text-muted leading-tight">{label}</span>
+                    </div>
+                    <div className={`text-base font-bold ${color} mb-0.5`}>{value}</div>
+                    {pct != null && (
+                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${statusCls(pct)}`}>{statusTxt(pct)}</span>
+                    )}
+                    {sub && !pct && <div className="text-xs text-text-muted">{sub}</div>}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </Card>
 
-        {/* 인원 */}
+        {/* 현재 인원 */}
         <Card>
-          <SecTitle>현재 매장 인원: {stats.total}명</SecTitle>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:'5px', marginTop:'6px' }}>
+          <SecTitle><Users className="w-3.5 h-3.5" />현재 매장 인원: {stats.total}명</SecTitle>
+          <div className="flex flex-wrap gap-1.5 mt-1">
             {CLASS_KEYS.map(cls => (
-              <div key={cls} style={{
-                display:'flex', alignItems:'center', gap:'4px', fontSize:'12px',
-                background: CUSTOMER_CLASSES[cls].color + '22',
-                border: `1px solid ${CUSTOMER_CLASSES[cls].color}44`,
-                borderRadius:'4px', padding:'3px 8px',
-              }}>
-                <span>{CUSTOMER_CLASSES[cls].icon}</span>
-                <span style={{ color: CUSTOMER_CLASSES[cls].color }}>{CUSTOMER_CLASSES[cls].short}</span>
-                <span style={{ fontWeight:'bold' }}>{stats.counts[cls]}</span>
+              <div key={cls} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border"
+                style={{ background: CUSTOMER_CLASSES[cls].color + '18', borderColor: CUSTOMER_CLASSES[cls].color + '44' }}>
+                <span className="font-semibold" style={{ color: CUSTOMER_CLASSES[cls].color }}>{CUSTOMER_CLASSES[cls].short}</span>
+                <span className="font-bold text-text">{stats.counts[cls]}</span>
               </div>
             ))}
           </div>
           {stats.checkoutCnt > 0 && (
-            <div style={{ fontSize:'11px', color:'#ffaa44', marginTop:'6px' }}>
-              🛒 계산대 대기: {stats.checkoutCnt}명
+            <div className="flex items-center gap-1 text-xs text-warn mt-1.5">
+              <ShoppingCart className="w-3 h-3" />계산대 대기: {stats.checkoutCnt}명
             </div>
           )}
         </Card>
@@ -1790,32 +1900,29 @@ export default function RetailDashboard() {
         {/* 혼잡 매대 */}
         {stats.topZones.length > 0 && (
           <Card>
-            <SecTitle>🔥 혼잡 매대 Top {stats.topZones.length}</SecTitle>
-            {stats.topZones.map((z, i) => (
-              <div key={z.label} style={{ display:'flex', justifyContent:'space-between', fontSize:'13px', marginTop:'5px' }}>
-                <span style={{ color:'#c0c0e0' }}>{i+1}. {z.label}</span>
-                <span style={{ color:'#ff8040', fontWeight:'bold' }}>{z.count}명</span>
-              </div>
-            ))}
+            <SecTitle><Flame className="w-3.5 h-3.5 text-orange-500" />혼잡 매대 Top {stats.topZones.length}</SecTitle>
+            <div className="flex flex-col gap-1.5 mt-1">
+              {stats.topZones.map((z, i) => (
+                <div key={z.label} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg px-3 py-1.5 border border-border">
+                  <span className="text-text">{i+1}. {z.label}</span>
+                  <span className="text-xs font-bold text-orange-500 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">{z.count}명</span>
+                </div>
+              ))}
+            </div>
           </Card>
         )}
 
         {/* 매출 차트 */}
         <Card>
-          <SecTitle>💰 클래스별 예상 매출</SecTitle>
-          <div style={{ fontSize:'13px', marginBottom:'4px', color:'#e0e0ff' }}>
-            총 ₩{stats.totalRev.toLocaleString()}
-          </div>
-          <ResponsiveContainer width='100%' height={115}>
+          <SecTitle><DollarSign className="w-3.5 h-3.5" />클래스별 예상 매출</SecTitle>
+          <div className="text-sm font-semibold text-text mb-2">총 ₩{stats.totalRev.toLocaleString()}</div>
+          <ResponsiveContainer width="100%" height={115}>
             <BarChart data={stats.revByClass} margin={{ top:0, right:8, left:-20, bottom:0 }}>
-              <XAxis dataKey='name' tick={{ fill:'#7070aa', fontSize:10 }} />
-              <YAxis tick={{ fill:'#7070aa', fontSize:9 }} tickFormatter={v => v>=1000 ? `${(v/1000).toFixed(0)}K` : v} />
-              <Tooltip
-                contentStyle={{ background:'#161628', border:'1px solid #2a2a5a', color:'#e0e0ff', fontSize:'11px' }}
-                formatter={v => [`₩${v.toLocaleString()}`, '매출']}
-              />
-              <Bar dataKey='value' radius={[3,3,0,0]}>
-                {stats.revByClass.map((e,i) => <Cell key={i} fill={e.color} />)}
+              <XAxis dataKey="name" tick={{ fill:'#6b7280', fontSize:10 }} />
+              <YAxis tick={{ fill:'#6b7280', fontSize:9 }} tickFormatter={v => v>=1000 ? `${(v/1000).toFixed(0)}K` : v} />
+              <Tooltip {...TT_STYLE} formatter={v => [`₩${v.toLocaleString()}`, '매출']} />
+              <Bar dataKey="value" radius={[6,6,0,0]}>
+                {stats.revByClass.map((e,i) => <Cell key={i} fill={CLASS_PURPLE[e.classType] || CLASS_PURPLE.adult_male} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -1824,16 +1931,13 @@ export default function RetailDashboard() {
         {/* 체류 시간 차트 */}
         {stats.dwellByZone.length > 0 && (
           <Card>
-            <SecTitle>⏱ 매대별 평균 체류 (초)</SecTitle>
-            <ResponsiveContainer width='100%' height={145}>
-              <BarChart data={stats.dwellByZone} layout='vertical' margin={{ top:0, right:28, left:26, bottom:0 }}>
-                <XAxis type='number' tick={{ fill:'#7070aa', fontSize:9 }} />
-                <YAxis type='category' dataKey='name' tick={{ fill:'#8080c0', fontSize:9 }} width={54} />
-                <Tooltip
-                  contentStyle={{ background:'#161628', border:'1px solid #2a2a5a', color:'#e0e0ff', fontSize:'11px' }}
-                  formatter={v => [`${v}초`, '평균 체류']}
-                />
-                <Bar dataKey='avg' fill='#5a7aff' radius={[0,3,3,0]} />
+            <SecTitle><Clock className="w-3.5 h-3.5" />매대별 평균 체류 (초)</SecTitle>
+            <ResponsiveContainer width="100%" height={145}>
+              <BarChart data={stats.dwellByZone} layout="vertical" margin={{ top:0, right:28, left:26, bottom:0 }}>
+                <XAxis type="number" tick={{ fill:'#6b7280', fontSize:9 }} />
+                <YAxis type="category" dataKey="name" tick={{ fill:'#6b7280', fontSize:9 }} width={54} />
+                <Tooltip {...TT_STYLE} formatter={v => [`${v}초`, '평균 체류']} />
+                <Bar dataKey="avg" fill={OURS} radius={[0,6,6,0]} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -1842,43 +1946,45 @@ export default function RetailDashboard() {
         {/* 인사이트 */}
         {stats.insights.length > 0 && (
           <Card>
-            <SecTitle>💡 추천 인사이트</SecTitle>
-            {stats.insights.map((ins, i) => (
-              <div key={i} style={{
-                fontSize:'11px', marginTop:'6px', padding:'6px 8px', lineHeight:'1.5',
-                background:'#161630', borderRadius:'4px', borderLeft:'3px solid #4a6aff',
-              }}>
-                {ins}
-              </div>
-            ))}
+            <SecTitle><Zap className="w-3.5 h-3.5 text-amber-500" />추천 인사이트</SecTitle>
+            <div className="flex flex-col gap-1.5 mt-1">
+              {stats.insights.map((ins, i) => (
+                <div key={i} className="text-xs text-text leading-relaxed px-3 py-2 bg-accent-light border-l-2 border-accent rounded-r-lg">
+                  {ins}
+                </div>
+              ))}
+            </div>
           </Card>
         )}
 
         {/* 다운로드 */}
         <Card>
-          <SecTitle>📥 데이터 다운로드</SecTitle>
-          <div style={{ display:'flex', flexDirection:'column', gap:'7px', marginTop:'6px' }}>
-            <Btn bg='#1a2a4a' onClick={saveHeatmapImages}>
-              🗺 히트맵 이미지 저장 (통합 + 4종 + 비교)
+          <SecTitle><Download className="w-3.5 h-3.5" />데이터 다운로드</SecTitle>
+          <div className="flex flex-col gap-1.5 mt-1">
+            <Btn onClick={saveHeatmapImages}>
+              <Map className="w-3.5 h-3.5 text-accent" />히트맵 이미지 저장
             </Btn>
-            <Btn bg='#1a3a1a' onClick={downloadPurchaseCSV}>📋 구매 내역 CSV</Btn>
-            <Btn bg='#1a3a1a' onClick={downloadSummaryCSV}>📊 구매 통계 CSV</Btn>
-            <Btn bg='#1a3a1a' onClick={downloadDwellCSV}>⏱ 체류 분석 CSV</Btn>
+            <Btn onClick={downloadPurchaseCSV}><Download className="w-3.5 h-3.5" />구매 내역 CSV</Btn>
+            <Btn onClick={downloadSummaryCSV}><Download className="w-3.5 h-3.5" />구매 통계 CSV</Btn>
+            <Btn onClick={downloadDwellCSV}><Download className="w-3.5 h-3.5" />체류 분석 CSV</Btn>
           </div>
         </Card>
       </aside>
       )}
+
+      </div>{/* flex flex-1 wrapper */}
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UI 서브 컴포넌트
+// UI 서브 컴포넌트 (Tailwind 기반)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Card({ children }) {
+function Card({ children, className = '' }) {
   return (
-    <div style={{ background:'#161628', border:'1px solid #222244', borderRadius:'6px', padding:'10px' }}>
+    <div className={`bg-white rounded-2xl border border-border/60 p-3 ${className}`}
+      style={{ boxShadow: '0 1px 2px rgba(16,24,40,0.04), 0 12px 28px -16px rgba(16,24,40,0.10)' }}>
       {children}
     </div>
   );
@@ -1886,35 +1992,35 @@ function Card({ children }) {
 
 function SecTitle({ children }) {
   return (
-    <div style={{ fontSize:'11px', fontWeight:'bold', color:'#7070b0', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:'5px' }}>
+    <div className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2 flex items-center gap-1.5">
       {children}
     </div>
   );
 }
 
-function Btn({ bg, onClick, children }) {
+function Btn({ onClick, children, variant = 'default', className = '' }) {
+  const base = 'w-full text-left text-sm font-medium px-3 py-2 rounded-xl transition-colors cursor-pointer border flex items-center gap-2';
+  const variants = {
+    default: 'bg-gray-50 hover:bg-gray-100 text-text border-border',
+    primary: 'bg-accent hover:bg-accent-hover text-white border-accent',
+    danger:  'bg-red-50 hover:bg-red-100 text-red-700 border-red-200',
+    success: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200',
+  };
   return (
-    <button onClick={onClick} style={{
-      background: bg, color:'#e0e0ff', border:'none', borderRadius:'4px',
-      padding:'7px 10px', cursor:'pointer', fontSize:'12px', fontWeight:'bold',
-      textAlign:'left', transition:'opacity .15s',
-    }}
-      onMouseEnter={e => e.currentTarget.style.opacity='0.8'}
-      onMouseLeave={e => e.currentTarget.style.opacity='1'}
-    >
+    <button onClick={onClick} className={`${base} ${variants[variant] || variants.default} ${className}`}>
       {children}
     </button>
   );
 }
 
-function SliderRow({ label, labelColor, min, max, step=1, value, onChange }) {
+function SliderRow({ label, labelColor, min, max, step = 1, value, onChange }) {
   return (
-    <div style={{ marginTop:'6px' }}>
-      <div style={{ fontSize:'12px', color: labelColor||'#9090c0', marginBottom:'2px' }}>{label}</div>
+    <div className="mt-2">
+      <div className="text-xs mb-1" style={{ color: labelColor || '#6b7280' }}>{label}</div>
       <input
-        type='range' min={min} max={max} step={step} value={value}
+        type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(Number(e.target.value))}
-        style={{ width:'100%', accentColor:'#5a7aff', cursor:'pointer' }}
+        className="w-full accent-accent cursor-pointer h-1.5"
       />
     </div>
   );
@@ -1922,14 +2028,52 @@ function SliderRow({ label, labelColor, min, max, step=1, value, onChange }) {
 
 function CheckRow({ label, checked, onChange }) {
   return (
-    <label style={{ display:'flex', alignItems:'center', gap:'6px', cursor:'pointer', fontSize:'13px', marginTop:'5px' }}>
-      <input type='checkbox' checked={checked} onChange={e => onChange(e.target.checked)} style={{ accentColor:'#5a7aff' }} />
+    <label className="flex items-center gap-2 cursor-pointer text-sm text-text mt-1.5">
+      <input
+        type="checkbox" checked={checked}
+        onChange={e => onChange(e.target.checked)}
+        className="accent-accent w-3.5 h-3.5"
+      />
       {label}
     </label>
   );
 }
 
-const selectSt = {
-  width:'100%', background:'#161628', color:'#e0e0ff',
-  border:'1px solid #2a2a5a', padding:'5px 6px', borderRadius:'4px', fontSize:'12px',
+function Accordion({ title, icon: Icon, children, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border border-border/60 rounded-xl overflow-hidden"
+      style={{ boxShadow: '0 1px 2px rgba(16,24,40,0.03)' }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-3 py-2.5 bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-text"
+      >
+        <span className="flex items-center gap-2">
+          {Icon && <Icon className="w-4 h-4 text-text-muted" />}
+          {title}
+        </span>
+        {open
+          ? <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
+          : <ChevronRight className="w-3.5 h-3.5 text-text-muted" />}
+      </button>
+      {open && <div className="p-3 border-t border-border/60 bg-white">{children}</div>}
+    </div>
+  );
+}
+
+// ── 소프트 퍼플·핑크 팔레트 ─────────────────────────────────────────────────
+const CLASS_PURPLE = {
+  adult_male:   '#7c6df0',
+  adult_female: '#a78bfa',
+  minor_male:   '#c4a3ec',
+  minor_female: '#f0abfc',
 };
+const OURS = '#8b7bf0';
+
+const TT_STYLE = {
+  contentStyle: { background: '#fff', border: '1px solid #ececf3', borderRadius: 8, fontSize: 12, color: '#1f2937' },
+  itemStyle:    { color: '#1f2937' },
+  labelStyle:   { color: '#6b7280', fontWeight: 600 },
+};
+
+const selectSt = 'w-full bg-white text-text border border-border rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30';
