@@ -34,9 +34,10 @@
 
 | 이름 | 역할 및 담당 업무 |
 |------|--------------------------------------------------------------|
-| **안은정** | - CCTV 영상 분석 파이프라인 설계 및 구현 (`run_pipeline.py`) <br> - YOLOv8-pose 기반 사람 감지·추적(BoT-SORT, Re-ID) <br> - 키포인트 기반 성별·나이 판별 (생체역학 모델) <br> - MiVOLO v2 후처리 분류 연동 <br> - 구역 체류·구매 판정 로직 및 KPI CSV 내보내기 |
-| **이준구** | - Transformer 예측 모델 설계·학습 (`model/model.py`, `train.py`) <br> - SpaceTimeBlock(공간+시간 이중 어텐션) 구현 <br> - 데이터셋 전처리 (`PurchaseGridDataset`) <br> - FastAPI 예측 서버 구현 (`server/`) <br> - 모델 성능 평가 및 비교 분석 |
-| **박동혁** | - React 시뮬레이션 대시보드 개발 (`simul/`) <br> - Web Worker 기반 4개월 배치 시뮬레이션 (`simulationWorker.js`) <br> - 실측 KPI 기반 시뮬레이터 보정(Calibration) <br> - Crossformer 다중 KPI 예측 모델 구현 (`kpi_crossformer.py`) <br> - AI 예측 패널 및 히트맵 시각화 |
+| **안은정** <br> (PM) | -KPI 지표 연구 및 선정 <br> -UI/UX 설계 <br> - 데이터 컨텍 및 수집 <<br> - 데이터셋 전처리 (`PurchaseGridDataset`) <br> - 문서화작업 (판넬, PPT, 보고서 ) <br> - 경영적 서비스 구상 |
+| **이준구** | - Transformer 예측 모델 설계·학습 (`model/model.py`, `train.py`) <br> - SpaceTimeBlock(공간+시간 이중 어텐션) 구현 <br> - 데이터셋 전처리 (`PurchaseGridDataset`) <br> - FastAPI 예측 서버 구현 (`server/`) <br> - 모델 성능 평가 및 비교 분석  React 시뮬레이션 대시보드 개발 (`simul/`) <br> - Web Worker 기반 4개월 배치 시뮬레이션 (`simulationWorker.js`) <br> - 실측 KPI 기반 시뮬레이터 보정(Calibration)  <br> - AI 예측 패널 및 히트맵 시각화 |
+| **박동혁** <br> (CCTV분석 - 개발)  | - CCTV 영상 분석 파이프라인 설계 및 구현 (`run_pipeline.py`) <br> - YOLOv8-pose 기반 사람 감지·추적(BoT-SORT, Re-ID) <br> - 키포인트 기반 성별·나이 판별 (생체역학 모델) <br> - MiVOLO v2 후처리 분류 연동 <br> - 구역 체류·구매 판정 로직 및 KPI CSV 내보내기 - SpaceTimeBlock(공간+시간 이중 어텐션) 구현 <br> - 데이터셋 전처리 (`PurchaseGridDataset`) <br> - Crossformer 다중 KPI 예측 모델 구현 (`kpi_crossformer.py`)<br> - 데이터셋 전처리 (`PurchaseGridDataset`)|
+
 
 <br>
 
@@ -214,14 +215,7 @@ npm run dev -- --host    # WSL 환경: Network IP로 접속
 3가지 모델을 동일한 시뮬레이션 데이터(84,406건, 120일)로 학습 후 비교했습니다.  
 학습/검증/테스트는 시간 순서 기준으로 분할 (Train 1~84일 / Val 85~104일 / Test 105~120일).
 
-| 지표 | LSTM | Crossformer | **Transformer (메인)** |
-|------|:----:|:-----------:|:---------------------:|
-| 구역별 MAPE | — | 3.9 ~ 19% | **4.0%** |
-| 시간대별 MAPE | 54.5% | — | **5.4%** |
-| 구역 순위 Spearman ρ | — | 0.964 | **1.000** (7/7 완벽) |
-| 시간대 순위 Spearman ρ | — | — | **0.972** |
-| Baseline 대비 성능 | **-6.6%** (열세) | — | **+31.0%** (우세) |
-| 학습 종료 epoch | 30 | 88 | **16** |
+<br>
 
 - **Transformer 선택 이유**: 구역 판매 순위를 완벽히 예측(ρ=1.000)하고, MAPE 4.0%로 오차가 가장 낮으며, 기준 모델 대비 31% 향상
 - **LSTM 탈락 이유**: 점심·저녁 피크 패턴을 포착하지 못해 기준 모델보다 오히려 성능 열세
@@ -245,7 +239,7 @@ npm run dev -- --host    # WSL 환경: Network IP로 접속
 
 | 파일 | 내용 | 건수 |
 |------|------|:----:|
-| `ice_batch_purchases.csv` | 실측 매장 7일 구매 로그 | 65건 |
+| `ice_batch_purchases.csv` | 실측 매장 7일 구매 로그 | 495건 |
 | `ice_zone_kpi.csv` | 실측 구역별 KPI | 9구역 |
 | `ice_class_kpi.csv` | 실측 고객군별 KPI | 4분류 |
 | `model/data/batch_purchases_v2.csv` | 4개월 시뮬레이션 결과 (학습 데이터) | 84,406건 |
