@@ -135,7 +135,7 @@ export default function ModelComparison({ comparison, transformer, crossformer, 
                 <tr key={r.model} className="border-b border-border last:border-0 hover:bg-gray-50" style={idx % 2 === 1 ? { background: '#faf9fe' } : {}}>
                   <td className="px-4 py-3 font-medium whitespace-nowrap">
                     <span className={`badge mr-2 ${FLAG_STYLE[r.flag]}`}>
-                      {r.flag === 'best' ? '★ Best' : r.flag === 'good' ? '2nd' : '3rd'}
+                      {r.flag === 'best' ? '1위' : r.flag === 'good' ? '2위' : '3위'}
                     </span>
                     {r.model}
                   </td>
@@ -164,7 +164,7 @@ export default function ModelComparison({ comparison, transformer, crossformer, 
         <div className="card p-4">
           <p className="section-title">MAPE 비교 (낮을수록 오차 적음)</p>
           <MapeChart transformer={transformer} crossformer={crossformer} lstm={lstm} />
-          <p className="text-xs text-text-muted mt-2 text-center">점선 = 실무 기준선 10%</p>
+          <p className="text-xs text-text-muted mt-2 text-center">막대가 짧을수록 예측 오차가 적음</p>
         </div>
       </div>
     </div>

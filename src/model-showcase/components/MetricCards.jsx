@@ -26,7 +26,7 @@ export default function MetricCards({ transformer, crossformer }) {
             icon={Target}
             label="구역별 MAPE"
             value={`${transformer.metrics.zoneMAPE}%`}
-            sub="실무 기준 10% 이하 ✅"
+            sub="예측 오차율 (낮을수록 우수)"
             color="text-accent"
             bg="bg-accent-light"
           />
@@ -34,7 +34,7 @@ export default function MetricCards({ transformer, crossformer }) {
             icon={Target}
             label="시간대별 MAPE"
             value={`${transformer.metrics.hourMAPE}%`}
-            sub="실무 기준 10% 이하 ✅"
+            sub="예측 오차율 (낮을수록 우수)"
             color="text-accent"
             bg="bg-accent-light"
           />
@@ -42,7 +42,7 @@ export default function MetricCards({ transformer, crossformer }) {
             icon={CheckCircle}
             label="구역 순위 ρ"
             value={transformer.metrics.zoneSpearmanRho.toFixed(3)}
-            sub={`${transformer.zoneShare.length}/${transformer.zoneShare.length} 구역 완벽 순위 재현`}
+            sub={`${transformer.zoneShare.length}개 구역 순위 일치`}
             color="text-ok"
             bg="bg-green-50"
           />
@@ -62,7 +62,7 @@ export default function MetricCards({ transformer, crossformer }) {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard
             icon={Zap}
-            label="전환효율 MAPE (KPI#7)"
+            label="전환효율 MAPE"
             value={`${crossformer.metrics.kpi7EfficiencyMAPE}%`}
             sub={`Spearman ρ ${crossformer.metrics.kpi7EfficiencyRho}`}
             color="text-violet-600"
@@ -70,25 +70,25 @@ export default function MetricCards({ transformer, crossformer }) {
           />
           <MetricCard
             icon={Zap}
-            label="체류시간 MAPE (KPI#3)"
+            label="체류시간 MAPE"
             value={`${crossformer.metrics.kpi3DwellMAPE}%`}
-            sub={`ρ ${crossformer.metrics.kpi3DwellRho} — 유일 체류 예측`}
+            sub={`순위 일치도 ρ ${crossformer.metrics.kpi3DwellRho}`}
             color="text-violet-600"
             bg="bg-violet-50"
           />
           <MetricCard
             icon={CheckCircle}
-            label="고객군 순위 ρ (KPI#5)"
+            label="고객군 순위 ρ"
             value={crossformer.metrics.kpi5CustomerRho.toFixed(3)}
-            sub="4군 순위 완벽 재현"
+            sub="4개 고객군 순위 일치"
             color="text-ok"
             bg="bg-green-50"
           />
           <MetricCard
             icon={CheckCircle}
-            label="비효율 구역 ρ (KPI#8)"
+            label="비효율 구역 ρ"
             value={crossformer.metrics.kpi8InefficientRho.toFixed(3)}
-            sub={`Best val loss ${crossformer.training.bestValLoss}`}
+            sub="체류 대비 전환이 낮은 구역 순위 예측"
             color="text-ok"
             bg="bg-green-50"
           />

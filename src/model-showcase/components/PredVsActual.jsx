@@ -97,7 +97,7 @@ export default function PredVsActual({ transformer, crossformer }) {
           <>
             <HourlyChart data={transformer.hourlyPredVsActual} />
             <p className="text-xs text-text-muted mt-2 text-center">
-              피크 패턴 정확히 재현 — 시간대 MAPE {transformer.metrics.hourMAPE}%
+              시간대별 예측 vs 실제 — 시간대 MAPE {transformer.metrics.hourMAPE}%
             </p>
           </>
         )}
@@ -120,19 +120,24 @@ export default function PredVsActual({ transformer, crossformer }) {
       </div>
 
       <div className="card p-4">
-        <p className="section-title">Crossformer — 비효율 구역 Top 3 예측 (KPI #8, ρ={crossformer.metrics.kpi8InefficientRho})</p>
+        <p className="section-title">Crossformer — 재배치 검토 1순위 구역 Top 3</p>
         <div className="grid grid-cols-3 gap-4 mt-2">
-          {crossformer.inefficientTop3.map((z, i) => (
-            <div key={z.zone} className={`border rounded-xl p-4 text-center ${INEFF_COLORS[i]}`}>
-              <div className="text-2xl font-bold">#{i + 1}</div>
-              <div className="font-semibold mt-1">{z.label}</div>
-              <div className="text-xl font-bold mt-1">{z.score.toFixed(3)}</div>
-              <div className="text-xs mt-0.5 opacity-70">비효율 지수</div>
-            </div>
-          ))}
+          {crossformer.inefficientTop3.map((z, i) => {
+            const ratio = Math.round((z.convRate / crossformer.avgConvRate) * 100)
+            const ratioText = ratio <= 55 ? '절반 수준' : `${ratio}% 수준`
+            return (
+              <div key={z.zone} className={`border rounded-xl p-4 ${INEFF_COLORS[i]}`}>
+                <div className="text-2xl font-bold">#{i + 1}</div>
+                <div className="font-semibold mt-1">{z.label}</div>
+                <div className="text-sm mt-2">체류 {z.dwellSec}초 · 전환 {z.convRate}%</div>
+                <div className="text-xs mt-1 opacity-80">평균 전환({crossformer.avgConvRate}%)의 {ratioText}</div>
+                <div className="text-xs font-medium mt-2">→ 진열·가격 재검토 대상</div>
+              </div>
+            )
+          })}
         </div>
         <p className="text-xs text-text-muted mt-3">
-          비효율 지수 = 체류 대비 전환이 낮은 구역. 상품 재배치 또는 프로모션 대상으로 식별됨.
+          체류 시간은 긴데 구매 전환은 매장 평균보다 낮은 구역입니다. 진열 위치·가격·프로모션 재검토 우선순위가 높습니다.
         </p>
       </div>
     </div>

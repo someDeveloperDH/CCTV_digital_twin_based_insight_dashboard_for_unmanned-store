@@ -1522,7 +1522,7 @@ export default function RetailDashboard() {
           ...(batchData ? [
             { id: 'data',       label: 'KPI 분석',  icon: BarChart2   },
             { id: 'ai',         label: 'AI 예측',   icon: Brain       },
-            { id: 'validation', label: '모델 검증', icon: FlaskConical },
+            { id: 'validation', label: '모델 구조', icon: FlaskConical },
           ] : []),
         ].map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => setActiveTab(id)}
@@ -1765,7 +1765,7 @@ export default function RetailDashboard() {
         <div className="flex-1 flex flex-col overflow-hidden bg-bg">
           <div className="flex items-center gap-3 px-4 py-2.5 bg-white border-b border-border">
             <span className="text-sm font-semibold text-text">
-              {activeTab === 'data' ? 'KPI 분석' : activeTab === 'ai' ? 'AI 예측' : '모델 검증'}
+              {activeTab === 'data' ? 'KPI 분석' : activeTab === 'ai' ? 'AI 예측' : '모델 구조'}
               {' '}— {batchData?.dailyStats?.length || 120}일 배치 결과
             </span>
             <span className="text-xs text-text-muted">

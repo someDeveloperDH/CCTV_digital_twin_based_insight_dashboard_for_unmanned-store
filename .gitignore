@@ -29,3 +29,7 @@ claude.md
 
 # Claude Code 메모리
 .claude/
+
+# 앱 필수 데이터 (model-showcase 차트 JSON — 위 data/ 무시에서 제외)
+!src/model-showcase/data/
+!src/model-showcase/data/**

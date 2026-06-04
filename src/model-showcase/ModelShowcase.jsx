@@ -16,9 +16,9 @@ const STORE_METRICS = {
 }
 
 const STORE_TABS = [
-  { key: 'icecream',    label: '🍦 아이스크림 무인매장' },
-  { key: 'convenience', label: '🏪 편의점' },
-  { key: 'supermarket', label: '🛒 슈퍼마켓' },
+  { key: 'icecream',    label: '아이스크림 무인매장' },
+  { key: 'convenience', label: '편의점' },
+  { key: 'supermarket', label: '슈퍼마켓' },
 ]
 
 function SectionHeader({ number, title, sub }) {
@@ -142,7 +142,7 @@ export default function ModelShowcase() {
           <SectionHeader
             number={2}
             title="핵심 성능 지표"
-            sub="MAPE 10% 이하 = 실무 사용 가능 기준 | Spearman ρ 0.7 이상 = 신뢰 가능"
+            sub="MAPE = 예측 오차율(낮을수록 우수) · Spearman ρ = 구역 순위 일치도(1에 가까울수록 우수)"
           />
           <MetricCards transformer={transformer} crossformer={crossformer} />
         </section>

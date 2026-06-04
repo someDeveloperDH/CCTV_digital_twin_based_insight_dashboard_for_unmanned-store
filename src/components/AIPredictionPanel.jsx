@@ -79,14 +79,16 @@ export default function AIPredictionPanel({ data, kpis }) {
     : [];
 
   const hourConvData = result
-    ? result.hourKPI.map(h => {
-        const actual = actualHourMap[h.hour];
-        return {
-          name:   h.label,
-          AI예측: +(h.convRate * 100).toFixed(1),
-          실측평균: actual ? +(actual.convRate * 100).toFixed(1) : undefined,
-        };
-      })
+    ? result.hourKPI
+        .filter(h => parseInt(h.label, 10) <= 19)   // 19시 이후(마감 시간대)는 예측 신뢰도가 낮아 제외
+        .map(h => {
+          const actual = actualHourMap[h.hour];
+          return {
+            name:   h.label,
+            AI예측: +(h.convRate * 100).toFixed(1),
+            실측평균: actual ? +(actual.convRate * 100).toFixed(1) : undefined,
+          };
+        })
     : [];
 
   const ineffTop3 = result
@@ -134,7 +136,7 @@ export default function AIPredictionPanel({ data, kpis }) {
 
       {state === 'loading' && (
         <div className="py-8 text-center text-accent text-sm">
-          모델 inference 중…
+          예측 계산 중…
         </div>
       )}
 
@@ -165,9 +167,9 @@ export default function AIPredictionPanel({ data, kpis }) {
       {state === 'done' && result && (
         <div className="grid grid-cols-2 gap-4">
 
-          {/* KPI #1 — 구역별 전환율 */}
+          {/* 구역별 전환율 */}
           <div className="bg-gray-50 rounded-lg p-3 border border-border">
-            <p className="section-title">KPI #1 — 구역별 구매전환율 (Transformer)</p>
+            <p className="section-title">구역별 구매전환율 (Transformer)</p>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={zoneConvData} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -181,9 +183,9 @@ export default function AIPredictionPanel({ data, kpis }) {
             </ResponsiveContainer>
           </div>
 
-          {/* KPI #6 — 시간대별 전환율 */}
+          {/* 시간대별 전환율 */}
           <div className="bg-gray-50 rounded-lg p-3 border border-border">
-            <p className="section-title">KPI #6 — 시간대별 구매전환율 (Transformer)</p>
+            <p className="section-title">시간대별 구매전환율 (Transformer)</p>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={hourConvData} margin={{ top: 4, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -197,9 +199,9 @@ export default function AIPredictionPanel({ data, kpis }) {
             </ResponsiveContainer>
           </div>
 
-          {/* KPI #3 + #7 */}
+          {/* 구역별 체류시간 · 전환효율 */}
           <div className="bg-gray-50 rounded-lg p-3 border border-border">
-            <p className="section-title">KPI #3/#7 — 구역별 체류시간 · 전환효율 (Crossformer)</p>
+            <p className="section-title">구역별 체류시간 · 전환효율 (Crossformer)</p>
             <div className="overflow-x-auto">
               <table className="data-table">
                 <thead>
@@ -230,9 +232,9 @@ export default function AIPredictionPanel({ data, kpis }) {
             <p className="text-xs text-text-muted mt-2">체류시간: AI예측 / 실측평균 · 효율지수 = 전환율 / 체류시간</p>
           </div>
 
-          {/* KPI #8 — 비효율 구역 TOP3 */}
+          {/* 비효율 구역 TOP3 */}
           <div className="bg-gray-50 rounded-lg p-3 border border-border">
-            <p className="section-title">KPI #8 — 비효율 구역 TOP3 (Crossformer)</p>
+            <p className="section-title">비효율 구역 TOP3 (Crossformer)</p>
             <div className="flex gap-2 mb-3">
               {ineffTop3.map((z, i) => (
                 <InefficientCard key={z.zoneId} rank={i} label={z.label} value={z.inefficiency} />
@@ -244,6 +246,18 @@ export default function AIPredictionPanel({ data, kpis }) {
             </p>
           </div>
 
+        </div>
+      )}
+
+      {/* ── 예측 후 추천 인사이트 (120일 데이터 종합) ── */}
+      {result && kpis?.insights?.length > 0 && (
+        <div className="mt-4 bg-gray-50 rounded-lg p-3 border border-border">
+          <p className="section-title">데이터 기반 추천 인사이트</p>
+          {kpis.insights.map((ins, i) => (
+            <div key={i} style={{ padding: '8px 10px', marginTop: '6px', background: '#efedfd', borderRadius: '6px', borderLeft: '3px solid #6d5ce7', fontSize: '12px', lineHeight: '1.6', color: '#374151' }}>
+              {ins}
+            </div>
+          ))}
         </div>
       )}
     </div>

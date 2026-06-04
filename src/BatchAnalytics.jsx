@@ -1,13 +1,4 @@
 import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
-import metricsIcecream    from './model-showcase/data/metrics_icecream.json';
-import metricsConvenience from './model-showcase/data/metrics_convenience.json';
-import metricsSupermarket from './model-showcase/data/metrics_supermarket.json';
-
-const STORE_METRICS = {
-  icecream:    metricsIcecream,
-  convenience: metricsConvenience,
-  supermarket: metricsSupermarket,
-};
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ReferenceLine, ReferenceArea,
   XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, ScatterChart, Scatter, ZAxis,
@@ -173,9 +164,9 @@ function computeKPIs(data) {
     .sort((a, b) => b.visitors - a.visitors);
   if (sortedByIneff.length > 0) {
     const z = sortedByIneff[0];
-    insights.push(`🔴 비효율 구역 "${z.label}": 방문 ${z.visitors}회 대비 전환율 ${(z.convRate * 100).toFixed(1)}% (전체 평균 ${(overallConvRate * 100).toFixed(1)}%의 절반 수준) — 진열 위치·가격 가시성·상품 구성 재검토 우선 권장`);
+    insights.push(`비효율 구역 "${z.label}": 방문 ${z.visitors}회 대비 전환율 ${(z.convRate * 100).toFixed(1)}% (전체 평균 ${(overallConvRate * 100).toFixed(1)}%의 절반 수준) — 진열 위치·가격 가시성·상품 구성 재검토 우선 권장`);
   } else if (worstZone && worstZone.avgDwell > 1.5) {
-    insights.push(`🔴 비효율 구역 "${worstZone.label}": 평균 체류 ${worstZone.avgDwell.toFixed(1)}초 대비 전환율 ${(worstZone.convRate * 100).toFixed(1)}% — 가격 태그 가독성 또는 구역 위치 개선 검토`);
+    insights.push(`비효율 구역 "${worstZone.label}": 평균 체류 ${worstZone.avgDwell.toFixed(1)}초 대비 전환율 ${(worstZone.convRate * 100).toFixed(1)}% — 가격 태그 가독성 또는 구역 위치 개선 검토`);
   }
 
   // [2] 교차구매 기회: 동일 고객이 함께 가장 많이 구매한 구역 쌍
@@ -200,7 +191,7 @@ function computeKPIs(data) {
     const lb = zoneKPIs.find(z => z.id === zB)?.label || zB;
     const totalBuyersForPair = Object.keys(agentZoneMap).length;
     const crossPct = totalBuyersForPair > 0 ? ((topCrossPair[1] / totalBuyersForPair) * 100).toFixed(0) : 0;
-    insights.push(`🔗 교차구매 기회: "${la}" + "${lb}" 동시 구매 ${topCrossPair[1]}건 (구매 고객의 ${crossPct}%) — 두 구역 인접 배치 또는 세트 묶음 할인으로 객단가 향상 효과 기대`);
+    insights.push(`교차구매 기회: "${la}" + "${lb}" 동시 구매 ${topCrossPair[1]}건 (구매 고객의 ${crossPct}%) — 두 구역 인접 배치 또는 세트 묶음 할인으로 객단가 향상 효과 기대`);
   }
 
   // [3] VIP 고객군 전략: 객단가 최고 고객군의 선호 구역 우선 관리
@@ -208,7 +199,7 @@ function computeKPIs(data) {
   const vipCls = [...classKPIs].filter(c => c.buyers > 0).sort((a, b) => b.avgBasket - a.avgBasket)[0];
   if (vipCls && totalRevenue > 0) {
     const vipRevShare = ((classKPIs.find(c => c.cls === vipCls.cls)?.revenue || 0) / totalRevenue * 100).toFixed(0);
-    insights.push(`👑 VIP 고객군 "${vipCls.label}": 객단가 ₩${vipCls.avgBasket.toLocaleString()}, 전체 매출의 ${vipRevShare}% 점유 — 해당 고객 선호 구역 재고 우선 보충·프리미엄 상품 진열 강화 권장`);
+    insights.push(`VIP 고객군 "${vipCls.label}": 객단가 ₩${vipCls.avgBasket.toLocaleString()}, 전체 매출의 ${vipRevShare}% 점유 — 해당 고객 선호 구역 재고 우선 보충·프리미엄 상품 진열 강화 권장`);
   }
 
   // [4] 피크 시간대 재고 관리: 매출 최고 시간대 vs 최저 시간대 격차
@@ -218,9 +209,9 @@ function computeKPIs(data) {
     const peak = hourRevSorted[0];
     const offPeak = hourRevSorted[hourRevSorted.length - 1];
     const ratio = (peak.revenue / offPeak.revenue).toFixed(1);
-    insights.push(`⏰ 피크 시간대 "${peak.label}" 매출이 최저 "${offPeak.label}" 대비 ${ratio}배 — 피크 전 재고 보충 스케줄링 및 비피크 시간대 할인 행사로 매출 평탄화 가능`);
+    insights.push(`피크 시간대 "${peak.label}" 매출이 최저 "${offPeak.label}" 대비 ${ratio}배 — 피크 전 재고 보충 스케줄링 및 비피크 시간대 할인 행사로 매출 평탄화 가능`);
   } else if (bestHours.length > 0) {
-    insights.push(`⏰ 매출 집중 시간대: ${bestHours.join(', ')} — 해당 시간대 재고 부족 방지 및 키오스크 정상 작동 점검 우선 권장`);
+    insights.push(`매출 집중 시간대: ${bestHours.join(', ')} — 해당 시간대 재고 부족 방지 및 키오스크 정상 작동 점검 우선 권장`);
   }
 
   // [5] 매출 추세: 4개월 전반부 vs 후반부 성장률
@@ -231,15 +222,14 @@ function computeKPIs(data) {
     const avgSecond = dailyStats.slice(half).reduce((s, d) => s + d.revenue, 0) / (days - half);
     const growthPct = avgFirst > 0 ? ((avgSecond / avgFirst - 1) * 100).toFixed(1) : null;
     if (growthPct !== null) {
-      const arrow = Number(growthPct) >= 5 ? '📈' : Number(growthPct) <= -5 ? '📉' : '➡️';
-      insights.push(`${arrow} 매출 추세: 후반부 일평균이 전반부 대비 ${Number(growthPct) >= 0 ? '+' : ''}${growthPct}% — ${Number(growthPct) > 5 ? '성장 유지 위해 인기 구역 재고 확보 강화' : Number(growthPct) < -5 ? '하락 감지, 비효율 구역 정비 및 프로모션 시급' : '안정적 매출 유지 중, 신상품 도입으로 성장 모멘텀 확보 검토'}`);
+      insights.push(`매출 추세: 후반부 일평균이 전반부 대비 ${Number(growthPct) >= 0 ? '+' : ''}${growthPct}% — ${Number(growthPct) > 5 ? '성장 유지 위해 인기 구역 재고 확보 강화' : Number(growthPct) < -5 ? '하락 감지, 비효율 구역 정비 및 프로모션 시급' : '안정적 매출 유지 중, 신상품 도입으로 성장 모멘텀 확보 검토'}`);
     }
   } else {
     const revSortedZones = [...zoneKPIs].sort((a, b) => b.revenue - a.revenue);
     if (revSortedZones.length >= 2 && totalRevenue > 0) {
       const top2Rev   = revSortedZones[0].revenue + revSortedZones[1].revenue;
       const top2Share = ((top2Rev / totalRevenue) * 100).toFixed(0);
-      insights.push(`📦 매출 집중도: 상위 2개 구역 ("${revSortedZones[0].label}", "${revSortedZones[1].label}")이 전체의 ${top2Share}% 점유 — 해당 구역 품절 리스크 집중 관리 필요`);
+      insights.push(`매출 집중도: 상위 2개 구역 ("${revSortedZones[0].label}", "${revSortedZones[1].label}")이 전체의 ${top2Share}% 점유 — 해당 구역 품절 리스크 집중 관리 필요`);
     }
   }
 
@@ -361,13 +351,12 @@ function ConfCell({ value, label, color }) {
 // ── 메인 컴포넌트 ────────────────────────────────────────────────────────────
 
 export default function BatchAnalytics({ data, view = 'data' }) {
-  const metrics = STORE_METRICS[data?.storeType] ?? metricsIcecream;
   const totalDays = data.dailyStats?.length || 120;
 
   const kpis = useMemo(() => computeKPIs(data), [data]);
   const {
     overallConvRate, zoneKPIs, classKPIs, hourlyAgg, dowAgg,
-    dailySalesChart, nextMonthForecast, bestHours, bestZone, worstZone, insights,
+    dailySalesChart, nextMonthForecast, bestHours, bestZone, worstZone,
   } = kpis;
 
   // ── 모델 검증 (4개월 → 3/1 분할) ──
@@ -764,14 +753,6 @@ export default function BatchAnalytics({ data, view = 'data' }) {
       </div>
 
       {/* ── 8행: 인사이트 ── */}
-      <Section title="배치 기반 추천 인사이트">
-        {insights.map((ins, i) => (
-          <div key={i} style={{ padding: '8px 10px', marginTop: '6px', background: '#efedfd', borderRadius: '6px', borderLeft: '3px solid #6d5ce7', fontSize: '12px', lineHeight: '1.6', color: '#374151' }}>
-            {ins}
-          </div>
-        ))}
-      </Section>
-
       {/* ── 10행: 데이터 다운로드 ── */}
       <Section title="📥 배치 데이터 다운로드">
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1178,9 +1159,9 @@ export default function BatchAnalytics({ data, view = 'data' }) {
             color={validationResults.customerValue.segmentStability > 0.75 ? '#40cc80' : validationResults.customerValue.segmentStability > 0.5 ? '#ffaa44' : '#ff6060'} />
           <ValidationCard label="교차 구매" metric="상관계수" value={validationResults.crossSell.matrixCorrelation.toFixed(3)}
             color={validationResults.crossSell.matrixCorrelation > 0.7 ? '#40cc80' : validationResults.crossSell.matrixCorrelation > 0.4 ? '#ffaa44' : '#ff6060'} />
-          <ValidationCard label="Transformer (KPI #1)" metric="구역 전환율 MAPE" value="4.0%"
+          <ValidationCard label="Transformer" metric="구역 전환율 MAPE" value="4.0%"
             sub="ρ = 1.000 · 검증 20일" color="#40cc80" />
-          <ValidationCard label="Crossformer (KPI #3)" metric="구역 체류시간 MAPE" value="8.6%"
+          <ValidationCard label="Crossformer" metric="구역 체류시간 MAPE" value="8.6%"
             sub="ρ = 0.964 · 검증 20일" color="#40cc80" />
         </div>
       </Section>
@@ -1475,87 +1456,166 @@ export default function BatchAnalytics({ data, view = 'data' }) {
 
       </>)}
 
-      {/* ── AI 딥러닝 KPI 예측 모델 검증 ── */}
-      <Section title="AI 딥러닝 KPI 예측 모델 검증">
-        <p className="text-xs text-text-muted mb-4">
-          학습 1~84일 → 검증 85~104일 (20일) 분할.
-          상세 검증 결과는 <a href="/model" target="_blank" className="text-accent hover:underline">모델 우수성 페이지 (/model)</a>에서 확인하세요.
-        </p>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          {/* Transformer */}
-          <div className="bg-gray-50 rounded-lg p-4 border border-border" style={{ borderTop: '3px solid #6d5ce7' }}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-bold text-accent">Transformer (KPI #1, #6)</span>
-              <span className="badge bg-accent-light text-accent">epoch {metrics.transformer.training.earlyStoppingEpoch} · ★ Best</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              {[
-                { label: '구역 MAPE', value: `${metrics.transformer.metrics.zoneMAPE}%`, color: '#16a34a' },
-                { label: '시간대 MAPE', value: `${metrics.transformer.metrics.hourMAPE}%`, color: '#16a34a' },
-                { label: '구역 ρ', value: metrics.transformer.metrics.zoneSpearmanRho.toFixed(3), color: '#16a34a' },
-              ].map(m => (
-                <div key={m.label} className="bg-white rounded p-2 text-center border border-border">
-                  <div className="text-xs text-text-muted mb-1">{m.label}</div>
-                  <div className="text-base font-bold" style={{ color: m.color }}>{m.value}</div>
+      {/* ── 모델 구조 한눈에 보기 ── */}
+      <Section title="모델 구조 한눈에 보기">
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            {
+              name: 'Transformer',
+              sub: 'PurchaseGridTransformer · 메인 모델',
+              accent: '#6d5ce7',
+              tokenBadge: '토큰 108개 (9구역×12시간대)',
+              input: {
+                shape: 'x [B, 7일, 108, 8]  ·  요일 [B, 7]',
+                items: [
+                  '윈도우 L=7일 — 과거 7일을 보고 다음 날 예측',
+                  '피처 8종: 구매수·체류·가격·고객수 + 4고객군 비중',
+                ],
+              },
+              struct: {
+                title: 'SpaceTimeBlock × 3',
+                steps: [
+                  ['공간 어텐션', '같은 시점 84토큰끼리 — 어느 구역이 같이 바쁜가'],
+                  ['시간 어텐션', '같은 토큰의 7일 시계열 — 요일별 변화 패턴'],
+                  ['FFN + 임베딩', '구역·시간대·요일·위치 분리 임베딩'],
+                ],
+              },
+              output: {
+                shape: '[B, 1, 108]',
+                desc: '예측 대상: 다음 날 구역별·시간대별 구매수 (→ 구역/시간대 전환율 산출)',
+              },
+            },
+            {
+              name: 'Crossformer',
+              sub: 'KPICrossformer · 다중 KPI 동시 예측',
+              accent: '#7c3aed',
+              tokenBadge: '토큰 432개 (9×12×4고객군)',
+              input: {
+                shape: 'x [B, 5일, 432, 4]  ·  요일 [B, 5]',
+                items: [
+                  '윈도우 L=5일 · 고객군(4) 축 추가',
+                  '피처 4종: 구매수·체류·가격·고객수',
+                ],
+              },
+              struct: {
+                title: 'Two-Stage Attention × 2',
+                steps: [
+                  ['Cross-Time', '각 토큰의 5일 시계열 어텐션'],
+                  ['Cross-Dim (Router)', '라우터 8개를 거쳐 구역·고객군 간 관계를 학습'],
+                  ['FFN + 임베딩', '구역·시간대·고객군 분리 임베딩'],
+                ],
+              },
+              output: {
+                shape: 'purchase [B,1,432] · dwell [B,1,108]',
+                desc: '예측 대상: 다음 날 구매수·체류시간 (→ 전환율·효율·비효율·고객군 KPI 산출)',
+              },
+            },
+          ].map(m => {
+            const Label = ({ children }) => (
+              <span className="inline-block text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-md"
+                style={{ background: `${m.accent}14`, color: m.accent }}>{children}</span>
+            );
+            return (
+            <div key={m.name} className="bg-surface rounded-xl p-5 border border-border"
+              style={{ boxShadow: '0 1px 3px rgba(16,24,40,0.05)' }}>
+              {/* header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: m.accent }} />
+                  <span className="text-lg font-bold" style={{ color: m.accent }}>{m.name}</span>
                 </div>
-              ))}
-            </div>
-            <div className="text-xs text-text-muted">
-              Baseline 대비 <span className="text-ok font-semibold">+{metrics.transformer.metrics.baselineImprovement}%</span>
-              {' · '}시간대 ρ {metrics.transformer.metrics.hourSpearmanRho.toFixed(3)}
-            </div>
-          </div>
+                <span className="text-xs font-medium px-2 py-1 rounded-md"
+                  style={{ background: `${m.accent}14`, color: m.accent }}>{m.tokenBadge}</span>
+              </div>
+              <div className="text-sm text-text-muted mt-1 mb-4">{m.sub}</div>
 
-          {/* Crossformer */}
-          <div className="bg-gray-50 rounded-lg p-4 border border-border" style={{ borderTop: '3px solid #7c3aed' }}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-bold" style={{ color: '#7c3aed' }}>Crossformer (KPI #3, #7, #8)</span>
-              <span className="badge bg-violet-50 text-violet-700">epoch {metrics.crossformer.training.earlyStoppingEpoch}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              {[
-                { label: '체류 MAPE', value: `${metrics.crossformer.metrics.kpi3DwellMAPE}%`, color: '#16a34a' },
-                { label: '효율 MAPE', value: `${metrics.crossformer.metrics.kpi7EfficiencyMAPE}%`, color: '#16a34a' },
-                { label: '비효율 ρ', value: metrics.crossformer.metrics.kpi8InefficientRho.toFixed(3), color: '#d97706' },
-              ].map(m => (
-                <div key={m.label} className="bg-white rounded p-2 text-center border border-border">
-                  <div className="text-xs text-text-muted mb-1">{m.label}</div>
-                  <div className="text-base font-bold" style={{ color: m.color }}>{m.value}</div>
+              {/* Input */}
+              <Label>Input</Label>
+              <code className="block font-mono text-sm text-text bg-bg rounded-lg px-3 py-2 mt-1.5 mb-2 leading-relaxed">
+                {m.input.shape}
+              </code>
+              <div className="space-y-1">
+                {m.input.items.map((it, i) => (
+                  <div key={i} className="flex gap-1.5 text-sm text-text-muted leading-relaxed">
+                    <span style={{ color: m.accent }}>·</span><span>{it}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 구조 */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <Label>구조</Label>
+                  <span className="text-sm font-medium text-text">{m.struct.title}</span>
                 </div>
-              ))}
+                <div className="space-y-2">
+                  {m.struct.steps.map(([k, v], i) => (
+                    <div key={i} className="flex gap-2.5">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mt-px"
+                        style={{ background: `${m.accent}14`, color: m.accent }}>{i + 1}</span>
+                      <div className="text-sm leading-relaxed">
+                        <span className="font-semibold text-text">{k}</span>
+                        <span className="text-text-muted"> — {v}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Output */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <Label>Output</Label>
+                <code className="block font-mono text-sm text-text bg-bg rounded-lg px-3 py-2 mt-1.5 mb-2 leading-relaxed">
+                  {m.output.shape}
+                </code>
+                <div className="text-sm text-text-muted leading-relaxed">{m.output.desc}</div>
+              </div>
             </div>
-            <div className="text-xs text-text-muted">
-              고객군 순위 ρ {metrics.crossformer.metrics.kpi5CustomerRho.toFixed(3)}
-              {' · '}체류 ρ {metrics.crossformer.metrics.kpi3DwellRho}
-            </div>
-          </div>
+            );
+          })}
         </div>
 
-        <div>
-          <p className="text-xs text-text-muted mb-2">KPI별 MAPE 비교 — 검증셋 기준 (낮을수록 우수)</p>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart
-              data={[
-                { kpi: 'KPI#1 구역전환율', mape: metrics.transformer.metrics.zoneMAPE, fill: '#6d5ce7' },
-                { kpi: 'KPI#6 시간대전환율', mape: metrics.transformer.metrics.hourMAPE, fill: '#a78bfa' },
-                { kpi: 'KPI#3 체류시간', mape: metrics.crossformer.metrics.kpi3DwellMAPE, fill: '#7c3aed' },
-                { kpi: 'KPI#7 전환효율', mape: metrics.crossformer.metrics.kpi7EfficiencyMAPE, fill: '#9333ea' },
-              ]}
-              layout="vertical" margin={{ top: 0, right: 60, left: 10, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis type="number" tick={TICK_STYLE} tickFormatter={v => `${v}%`} domain={[0, 15]} />
-              <YAxis type="category" dataKey="kpi" tick={TICK_STYLE} width={110} />
-              <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`, 'MAPE']} />
-              <Bar dataKey="mape" radius={[0, 6, 6, 0]}>
+        {/* 핵심 차이 요약 */}
+        <div className="mt-5">
+          <div className="text-sm font-semibold text-text mb-2">핵심 차이</div>
+          <div className="overflow-hidden rounded-xl border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-bg">
+                  <th className="text-left px-3 py-2.5 font-semibold text-text-muted w-1/4">항목</th>
+                  <th className="text-left px-3 py-2.5 font-semibold">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full" style={{ background: '#6d5ce7' }} />
+                      <span style={{ color: '#6d5ce7' }}>Transformer</span>
+                    </span>
+                  </th>
+                  <th className="text-left px-3 py-2.5 font-semibold">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full" style={{ background: '#7c3aed' }} />
+                      <span style={{ color: '#7c3aed' }}>Crossformer</span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {[
-                  { fill: '#6d5ce7' }, { fill: '#a78bfa' },
-                  { fill: '#7c3aed' }, { fill: '#9333ea' },
-                ].map((c, i) => <Cell key={i} fill={c.fill} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                  ['토큰 수', '108 (구역×시간대)', '432 (+고객군)'],
+                  ['입력 윈도우', '7일', '5일'],
+                  ['어텐션 방식', '공간 + 시간', 'Cross-Time + Router'],
+                  ['출력', '구매수 1종', '구매수 + 체류 2종'],
+                  ['파라미터', '457,825개', '174,914개'],
+                  ['학습 시간', '약 86초', '약 159초'],
+                  ['추론 시간', '30 ms / 샘플', '14 ms / 샘플'],
+                ].map((r, i) => (
+                  <tr key={i} className="border-t border-border hover:bg-bg/60 transition-colors">
+                    <td className="px-3 py-2 font-medium text-text">{r[0]}</td>
+                    <td className="px-3 py-2 text-text-muted">{r[1]}</td>
+                    <td className="px-3 py-2 text-text-muted">{r[2]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </Section>
 

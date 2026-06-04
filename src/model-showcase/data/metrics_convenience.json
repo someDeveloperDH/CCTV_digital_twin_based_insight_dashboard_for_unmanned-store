@@ -1,0 +1,141 @@
+{
+  "storeType": "convenience",
+  "storeLabel": "편의점",
+  "experimentDate": "2026-05-07",
+  "dataInfo": {
+    "source": "편의점 시뮬레이터 (120일)",
+    "totalRows": 98432,
+    "trainDays": 84,
+    "valDays": 20,
+    "testDays": 16
+  },
+  "transformer": {
+    "name": "PurchaseGridTransformer",
+    "description": "구역×시간대 격자 기반 SpaceTime Attention — 5개 구역 구매수 동시 예측",
+    "architecture": {
+      "input": "[B, L=7, N=5, F=8]",
+      "embedding": ["zone embedding [5, d=96]", "hour embedding [16, d=96]", "day-of-week embedding [7, d=96]", "positional embedding [L, d=96]"],
+      "encoder": "SpaceTimeBlock × 3  (Spatial Attn → Temporal Attn → FFN)",
+      "head": "LayerNorm → Linear(d=96, horizon=1)",
+      "output": "[B, H=1, N=5]  (log1p 공간)",
+      "params": "d_model=96  |  n_heads=4  |  n_layers=3  |  dropout=0.1"
+    },
+    "training": {
+      "optimizer": "AdamW (weight_decay=0.01)",
+      "lr": 0.001,
+      "lrSchedule": "Cosine + warmup 5 epoch",
+      "loss": "SmoothL1 (β=0.5)",
+      "earlyStoppingEpoch": 19,
+      "maxEpochs": 200
+    },
+    "metrics": {
+      "cellMAE": 2.31,
+      "cellMAPE": 41.8,
+      "cellSMAPE": 31.5,
+      "zoneMAE": 3.28,
+      "zoneMAPE": 3.4,
+      "zoneSpearmanRho": 1.000,
+      "hourMAE": 2.75,
+      "hourMAPE": 5.1,
+      "hourSpearmanRho": 0.978,
+      "baselineCellMAE": 3.42,
+      "baselineImprovement": 32.5
+    },
+    "improvement": {
+      "cellMAE": { "v1": 3.48, "v2": 2.31, "changePct": -33.6 },
+      "cellMAPE": { "v1": 77.3, "v2": 41.8, "changePct": -45.9 },
+      "zoneMAE": { "v1": 21.54, "v2": 3.28, "changePct": -84.8 },
+      "zoneRho": { "v1": 0.500, "v2": 1.000 },
+      "hourMAE": { "v1": 10.82, "v2": 2.75, "changePct": -74.6 },
+      "hourRho": { "v1": -0.418, "v2": 0.978 }
+    },
+    "zoneShare": [
+      { "zone": "beverage", "label": "음료",       "pred": 31.4, "actual": 31.0 },
+      { "zone": "snack",    "label": "과자·스낵",   "pred": 22.8, "actual": 23.2 },
+      { "zone": "daily",    "label": "생활용품",    "pred": 19.7, "actual": 20.1 },
+      { "zone": "frozen",   "label": "냉동·간편식", "pred": 13.8, "actual": 13.5 },
+      { "zone": "ramen",    "label": "라면·즉석",   "pred": 12.3, "actual": 12.2 }
+    ],
+    "hourlyPredVsActual": [
+      { "hour": 7,  "pred": 52.4,  "actual": 56.3  },
+      { "hour": 8,  "pred": 82.1,  "actual": 87.4  },
+      { "hour": 9,  "pred": 67.8,  "actual": 64.2  },
+      { "hour": 10, "pred": 44.3,  "actual": 42.8  },
+      { "hour": 11, "pred": 55.2,  "actual": 58.1  },
+      { "hour": 12, "pred": 112.5, "actual": 118.3 },
+      { "hour": 13, "pred": 98.7,  "actual": 103.4 },
+      { "hour": 14, "pred": 65.4,  "actual": 62.7  },
+      { "hour": 15, "pred": 60.8,  "actual": 63.5  },
+      { "hour": 16, "pred": 68.3,  "actual": 72.1  },
+      { "hour": 17, "pred": 85.6,  "actual": 88.9  },
+      { "hour": 18, "pred": 118.4, "actual": 124.7 },
+      { "hour": 19, "pred": 109.2, "actual": 115.8 },
+      { "hour": 20, "pred": 78.4,  "actual": 75.3  },
+      { "hour": 21, "pred": 58.7,  "actual": 55.4  },
+      { "hour": 22, "pred": 41.2,  "actual": 39.7  }
+    ]
+  },
+  "crossformer": {
+    "name": "KPI Crossformer",
+    "description": "Two-Stage Attention — 5가지 KPI(전환율·체류·효율·비효율·고객군) 동시 예측",
+    "architecture": {
+      "input": "[B, L=5, Z×T×C, F=4]",
+      "attention": "TwoStageAttentionLayer: Time Attn → Router-based Cross-Dim Attn",
+      "params": "d_model=64  |  n_heads=4  |  n_layers=2  |  n_router=8",
+      "output": "purchase head + dwell head"
+    },
+    "training": {
+      "loss": "SmoothL1",
+      "bestValLoss": 0.4218,
+      "earlyStoppingEpoch": 81,
+      "maxEpochs": 200
+    },
+    "metrics": {
+      "kpi2ConvMAPE": 12.8,
+      "kpi3DwellMAPE": 7.9,
+      "kpi3DwellRho": 0.967,
+      "kpi5CustomerRho": 1.000,
+      "kpi5CustomerMAPE": 18.4,
+      "kpi7EfficiencyMAPE": 3.7,
+      "kpi7EfficiencyRho": 0.965,
+      "kpi8InefficientRho": 0.921
+    },
+    "kpiDetails": [
+      { "id": "KPI #2", "name": "전체 구매전환율",   "mape": 12.8, "rho": null  },
+      { "id": "KPI #3", "name": "구역별 체류시간",    "mape": 7.9,  "rho": 0.967 },
+      { "id": "KPI #5", "name": "고객군별 구매수",    "mape": 18.4, "rho": 1.000 },
+      { "id": "KPI #7", "name": "체류 대비 전환효율", "mape": 3.7,  "rho": 0.965 },
+      { "id": "KPI #8", "name": "비효율 구역 지수",   "mape": null, "rho": 0.921 }
+    ],
+    "avgConvRate": 22,
+    "inefficientTop3": [
+      { "zone": "daily",  "label": "생활용품",    "dwellSec": 14.7, "convRate": 12 },
+      { "zone": "frozen", "label": "냉동·간편식", "dwellSec": 11.2, "convRate": 16 },
+      { "zone": "ramen",  "label": "라면·즉석",   "dwellSec": 9.5,  "convRate": 19 }
+    ]
+  },
+  "lstm": {
+    "name": "LSTM (팀원 A, 비교 대조군)",
+    "description": "셀별 구매비중 예측 — Persistence Baseline 대비 열위",
+    "training": {
+      "earlyStoppingEpoch": 28
+    },
+    "metrics": {
+      "mae": 0.004514,
+      "rmse": 0.006043,
+      "mape": 49.82,
+      "sMAPE": 44.27,
+      "baselineMAE": 0.004238,
+      "baselineImprovement": -6.51
+    }
+  },
+  "comparison": {
+    "spearmanRho": [
+      { "model": "LSTM",        "zoneRho": null,  "hourRho": null  },
+      { "model": "Crossformer", "zoneRho": 0.967, "hourRho": 0.965 },
+      { "model": "Transformer", "zoneRho": 1.000, "hourRho": 0.978 }
+    ],
+    "summary": "Spearman ρ 기준  Transformer ≥ Crossformer ≫ LSTM",
+    "headline": "Transformer·Crossformer·LSTM 세 모델의 다음 날 KPI 예측 성능 비교 결과"
+  }
+}
