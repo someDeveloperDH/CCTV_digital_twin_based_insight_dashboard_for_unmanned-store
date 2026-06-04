@@ -1,15 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+
+# 모델 가중치 (대용량)
+*.pt
+*.onnx
+*.pth
+checkpoints/
+checkpoints_crossformer/
+
 # 영상 데이터 (대용량)
 *.mp4
 *.avi
 *.mov
 *.mkv
+*.gif
 
-# YOLO / ONNX 모델 가중치
-*.pt
-*.onnx
-*.pth
-
-# 채널별 원본 영상 디렉토리
+# 채널별 원본/처리 영상 디렉토리
 ch1/
 ch3/
 ch6/
@@ -17,11 +30,16 @@ raw/
 mosaic/
 merged/
 
-# Python 캐시
-__pycache__/
-*.pyc
-*.pyo
+# 빌드 / 실행 산출물
+output/
+data/
+*.log
 
-# 기타
-*.egg-info/
+# OS / 에디터
+.DS_Store
+Thumbs.db
 .env
+claude.md
+
+# Claude Code 메모리
+.claude/

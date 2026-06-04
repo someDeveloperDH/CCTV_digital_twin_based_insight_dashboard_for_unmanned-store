@@ -1,0 +1,24 @@
+data:
+  purchases_csv: "data/batch_purchases_v2.csv"
+  zone_kpi_csv: "data/batch_zone_kpi (1).csv"
+  window_size: 7       # 입력 윈도우 (일)
+  horizon: 1           # 예측 horizon (일)
+  train_days: 84       # 1~84일 학습
+  val_days: 20         # 85~104일 검증
+
+model:
+  d_model: 96
+  n_heads: 4
+  n_layers: 3
+  dropout: 0.1
+
+train:
+  batch_size: 32
+  lr: 0.001
+  weight_decay: 0.01
+  epochs: 200
+  patience: 30         # early stopping
+  grad_clip: 1.0
+  warmup_epochs: 5
+  checkpoint_dir: "checkpoints"
+  device: "auto"
