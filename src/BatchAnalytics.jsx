@@ -9,7 +9,7 @@ const STORE_METRICS = {
   supermarket: metricsSupermarket,
 };
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, ReferenceLine, ReferenceArea,
+  LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ReferenceLine, ReferenceArea,
   XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, ScatterChart, Scatter, ZAxis,
 } from 'recharts';
 import { trainLogisticRegression, predictAllZones, runUCB1Bandit, trainRevenuePredictor, predictHourlyDemand, computeCustomerValueAnalysis, predictCrossSell } from './predictionModels.js';
@@ -29,6 +29,18 @@ const CLASS_PURPLE = {
   minor_male:   '#c4a3ec',
   minor_female: '#f0abfc',
 };
+
+// ── 막대 세로 그라데이션 (위 진하게 → 아래 연하게) ──────────────────────────
+// 주의: Recharts는 <defs>를 차트의 직접 자식으로만 인식한다. 커스텀 컴포넌트로
+// 감싸면 SVG에 렌더되지 않으므로, 각 차트 안에 BarGradientDefs를 인라인으로 펼쳐 쓴다.
+const barGradId = (color, lo = 35) => `bgrad-${color.replace('#', '')}-${lo}`;
+const BarGradientDefs = (colors, lo = 35) =>
+  [...new Set(colors)].map(c => (
+    <linearGradient key={c} id={barGradId(c, lo)} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stopColor={c} stopOpacity={1} />
+      <stop offset="100%" stopColor={c} stopOpacity={lo / 100} />
+    </linearGradient>
+  ));
 
 // ── 상수 ────────────────────────────────────────────────────────────────────
 
@@ -582,12 +594,13 @@ export default function BatchAnalytics({ data, view = 'data' }) {
         <Section title="🏪 구역별 구매전환율 (%)">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={zoneConvData} margin={{ top: 0, right: 8, left: -10, bottom: 40 }}>
+              <defs>{BarGradientDefs(zoneConvData.map((_, i) => softAt(i)), 60)}</defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={TICK_STYLE} angle={-30} textAnchor="end" interval={0} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => `${v}%`} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`, '구매전환율']} />
-              <Bar dataKey="전환율" radius={[6, 6, 0, 0]}>
-                {zoneConvData.map((_, i) => <Cell key={i} fill={softAt(i)} />)}
+              <Bar dataKey="전환율" radius={[50, 50, 0, 0]}>
+                {zoneConvData.map((_, i) => <Cell key={i} fill={`url(#${barGradId(softAt(i), 60)})`} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -638,12 +651,13 @@ export default function BatchAnalytics({ data, view = 'data' }) {
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={classKPIs.map(c => ({ name: c.short, 전환율: +(c.convRate * 100).toFixed(1), cls: c.cls }))}
               margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
+              <defs>{BarGradientDefs(classKPIs.map(c => CLASS_PURPLE[c.cls]), 60)}</defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={TICK_STYLE} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => `${v}%`} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [`${v}%`, '전환율']} />
-              <Bar dataKey="전환율" radius={[6, 6, 0, 0]}>
-                {classKPIs.map((c, i) => <Cell key={i} fill={CLASS_PURPLE[c.cls]} />)}
+              <Bar dataKey="전환율" radius={[50, 50, 0, 0]} maxBarSize={80}>
+                {classKPIs.map((c, i) => <Cell key={i} fill={`url(#${barGradId(CLASS_PURPLE[c.cls], 60)})`} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -654,25 +668,32 @@ export default function BatchAnalytics({ data, view = 'data' }) {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
         <Section title="📈 일별 매출 추이 (30일)">
           <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={dailySalesChart} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <AreaChart data={dailySalesChart} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <defs>
+                <linearGradient id="dailyRevGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stopColor="#6d5ce7" stopOpacity={0.45} />
+                  <stop offset="100%" stopColor="#6d5ce7" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="day" tick={TICK_STYLE} tickFormatter={v => `${v}일`} interval={4} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
               <Tooltip {...TOOLTIP_STYLE} formatter={(v, name) => [name === 'revenue' ? fmtWon(v) : `${v}%`, name === 'revenue' ? '매출' : '전환율']} />
-              <Line type="monotone" dataKey="revenue" stroke="#6d5ce7" strokeWidth={2} dot={false} name="매출" />
-            </LineChart>
+              <Area type="monotone" dataKey="revenue" stroke="#6d5ce7" strokeWidth={2} fill="url(#dailyRevGrad)" dot={false} name="매출" />
+            </AreaChart>
           </ResponsiveContainer>
         </Section>
 
         <Section title="📅 요일별 평균 매출">
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={dowAgg} margin={{ top: 5, right: 8, left: -10, bottom: 5 }}>
+              <defs>{BarGradientDefs([OURS, WEEKEND], 60)}</defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="dow" tick={TICK_STYLE} />
               <YAxis tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [fmtWon(v), '평균 매출']} />
-              <Bar dataKey="avgRevenue" radius={[6, 6, 0, 0]}>
-                {dowAgg.map((_, i) => <Cell key={i} fill={i >= 5 ? WEEKEND : OURS} />)}
+              <Bar dataKey="avgRevenue" radius={[50, 50, 0, 0]}>
+                {dowAgg.map((_, i) => <Cell key={i} fill={`url(#${barGradId(i >= 5 ? WEEKEND : OURS, 60)})`} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -700,11 +721,12 @@ export default function BatchAnalytics({ data, view = 'data' }) {
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={[...zoneKPIs].sort((a, b) => b.revenue - a.revenue).map(z => ({ name: z.label, revenue: z.revenue }))}
               layout="vertical" margin={{ top: 0, right: 30, left: 40, bottom: 0 }}>
+              <defs>{BarGradientDefs([OURS])}</defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis type="number" tick={TICK_STYLE} tickFormatter={v => fmtWon(v)} />
               <YAxis type="category" dataKey="name" tick={{ fill: '#6b7280', fontSize: 9 }} width={52} />
               <Tooltip {...TOOLTIP_STYLE} formatter={v => [fmtWon(v), '총 매출']} />
-              <Bar dataKey="revenue" fill={OURS} radius={[0, 6, 6, 0]} />
+              <Bar dataKey="revenue" fill={`url(#${barGradId(OURS)})`} radius={[0, 50, 50, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Section>
@@ -742,7 +764,7 @@ export default function BatchAnalytics({ data, view = 'data' }) {
       </div>
 
       {/* ── 8행: 인사이트 ── */}
-      <Section title="💡 배치 기반 추천 인사이트">
+      <Section title="배치 기반 추천 인사이트">
         {insights.map((ins, i) => (
           <div key={i} style={{ padding: '8px 10px', marginTop: '6px', background: '#efedfd', borderRadius: '6px', borderLeft: '3px solid #6d5ce7', fontSize: '12px', lineHeight: '1.6', color: '#374151' }}>
             {ins}
