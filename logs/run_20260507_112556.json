@@ -1,0 +1,147 @@
+{
+  "day": "10",
+  "started": "2026-05-07T10:53:59.084562",
+  "stages": [
+    {
+      "stage": "data",
+      "label": "데이터 확인",
+      "passed": true,
+      "elapsed_sec": 0.3,
+      "meta": {
+        "total_merged": 3,
+        "timeline_ratio": 1.0
+      }
+    },
+    {
+      "stage": "mosaic",
+      "label": "얼굴 모자이크",
+      "passed": true,
+      "elapsed_sec": 2.4,
+      "meta": {
+        "mosaic_metrics": [
+          {
+            "frames": 0,
+            "faces": 0,
+            "fps": 0.0,
+            "skipped": true
+          },
+          {
+            "frames": 0,
+            "faces": 0,
+            "fps": 0.0,
+            "skipped": true
+          },
+          {
+            "frames": 0,
+            "faces": 0,
+            "fps": 0.0,
+            "skipped": true
+          }
+        ]
+      }
+    },
+    {
+      "stage": "zones",
+      "label": "구역 설정 확인",
+      "passed": true,
+      "elapsed_sec": 0.0,
+      "meta": {
+        "cam_stats": {
+          "ch3": 9,
+          "ch6": 9,
+          "ch1": 9
+        },
+        "total": 11
+      }
+    },
+    {
+      "stage": "analyze",
+      "label": "영상 분석",
+      "passed": true,
+      "elapsed_sec": 1914.6,
+      "meta": {
+        "per_cam": [
+          {
+            "cam": "ch1_10",
+            "tracks": 162,
+            "frames_proc": 17982,
+            "frames_total": 53946,
+            "frames_biz_skip": 0,
+            "proc_fps": 42.8,
+            "gender_rate": 0.648,
+            "gender_dist": {
+              "M": 101,
+              "F": 4,
+              "?": 57
+            },
+            "gender_conf_mean": 0.819,
+            "adult_rate": 0.037
+          },
+          {
+            "cam": "ch3_10",
+            "tracks": 328,
+            "frames_proc": 47713,
+            "frames_total": 151553,
+            "frames_biz_skip": 2805,
+            "proc_fps": 41.4,
+            "gender_rate": 0.527,
+            "gender_dist": {
+              "M": 171,
+              "F": 2,
+              "?": 155
+            },
+            "gender_conf_mean": 0.82,
+            "adult_rate": 0.009
+          },
+          {
+            "cam": "ch6_10",
+            "tracks": 84,
+            "frames_proc": 13544,
+            "frames_total": 42387,
+            "frames_biz_skip": 585,
+            "proc_fps": 39.8,
+            "gender_rate": 0.798,
+            "gender_dist": {
+              "M": 66,
+              "F": 1,
+              "?": 17
+            },
+            "gender_conf_mean": 0.817,
+            "adult_rate": 0.036
+          }
+        ],
+        "reid": {
+          "ch1_tracks": 162,
+          "ch1_matched": 85,
+          "store_tracks": {
+            "ch3": 328,
+            "ch6": 84
+          }
+        },
+        "total_visitors": 162,
+        "purchasers": 0
+      }
+    },
+    {
+      "stage": "export",
+      "label": "CSV 출력",
+      "passed": true,
+      "elapsed_sec": 0.4,
+      "meta": {
+        "visitors": 162,
+        "purchasers": 0,
+        "conv_rate": 0.0
+      }
+    },
+    {
+      "stage": "validate",
+      "label": "결과 검증",
+      "passed": true,
+      "elapsed_sec": 0.0,
+      "meta": {}
+    }
+  ],
+  "finished": "2026-05-07T11:25:56.728151",
+  "total_sec": 1917.6,
+  "all_passed": true
+}

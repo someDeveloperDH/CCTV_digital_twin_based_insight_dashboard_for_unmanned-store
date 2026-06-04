@@ -1,0 +1,16 @@
+{
+  "day": "10",
+  "started": "2026-05-06T19:58:30.569072",
+  "stages": [
+    {
+      "stage": "data",
+      "label": "데이터 확인",
+      "passed": false,
+      "elapsed_sec": 0.3,
+      "meta": {
+        "total_merged": 3,
+        "timeline_ratio": 0.0
+      }
+    }
+  ]
+}

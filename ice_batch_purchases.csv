@@ -1,0 +1,206 @@
+﻿에이전트ID,고객분류,고객분류명,구역ID,구역명,상품명,개수,가격,체류시간,일차,시간대
+1,minor_male,미성인 남성,none,none,none,1,0,0,1,오전
+2,minor_male,미성인 남성,none,none,none,1,0,0,1,오전
+3,minor_male,미성인 남성,none,none,none,1,0,0,1,오전
+4,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+5,unknown,미확인,none,none,none,1,0,0,1,오후
+6,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,32,1,오후
+6,minor_male,미성인 남성,ice4,아이스크림4,none,1,0,11,1,오후
+6,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,40,1,오후
+7,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+8,unknown,미확인,none,none,none,1,0,0,1,오후
+9,unknown,미확인,none,none,none,1,0,0,1,오후
+10,unknown,미확인,none,none,none,1,0,0,1,오후
+11,adult_male,성인 남성,none,none,none,1,0,0,1,오후
+12,unknown,미확인,none,none,none,1,0,0,1,오후
+13,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+14,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+15,minor_female,미성인 여성,none,none,none,1,0,0,1,오후
+16,unknown,미확인,none,none,none,1,0,0,1,오후
+17,unknown,미확인,none,none,none,1,0,0,1,오후
+18,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+19,adult_male,성인 남성,none,none,none,1,0,0,1,오후
+20,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,10,1,오후
+21,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+22,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+23,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,8,1,오후
+24,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,5,1,오후
+24,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,38,1,오후
+25,adult_male,성인 남성,ice5,아이스크림5,none,1,0,123,1,오후
+25,adult_male,성인 남성,ice6,아이스크림6,none,1,0,3,1,오후
+26,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,3,1,오후
+27,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+28,adult_male,성인 남성,none,none,none,1,0,0,1,오후
+29,unknown,미확인,none,none,none,1,0,0,1,오후
+30,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+31,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+32,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+33,minor_male,미성인 남성,none,none,none,1,0,0,1,오후
+34,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,5,1,오후
+35,adult_male,성인 남성,none,none,none,1,0,0,1,오후
+36,unknown,미확인,none,none,none,1,0,0,1,오후
+37,unknown,미확인,none,none,none,1,0,0,1,오후
+38,adult_male,성인 남성,none,none,none,1,0,0,1,오후
+39,adult_male,성인 남성,none,none,none,1,0,0,1,오후
+40,adult_male,성인 남성,none,none,none,1,0,0,1,오후
+41,unknown,미확인,none,none,none,1,0,0,1,오후
+42,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,39,1,오후
+42,minor_male,미성인 남성,ice1,아이스크림1,none,1,0,6,1,오후
+42,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,4,1,오후
+43,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,5,1,저녁
+43,minor_male,미성인 남성,ice4,아이스크림4,none,1,0,5,1,저녁
+44,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+45,unknown,미확인,none,none,none,1,0,0,1,저녁
+46,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+47,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+48,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,3,1,저녁
+48,minor_male,미성인 남성,ice4,아이스크림4,none,1,0,6,1,저녁
+48,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,8,1,저녁
+49,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,18,1,저녁
+49,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,13,1,저녁
+50,minor_male,미성인 남성,ice4,아이스크림4,none,1,0,13,1,저녁
+50,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,7,1,저녁
+51,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,3,1,저녁
+52,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+53,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,3,1,저녁
+53,minor_male,미성인 남성,ice4,아이스크림4,none,1,0,10,1,저녁
+54,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+55,unknown,미확인,none,none,none,1,0,0,1,저녁
+56,minor_male,미성인 남성,ice3,아이스크림3,none,1,0,3,1,저녁
+56,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,9,1,저녁
+57,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,52,1,저녁
+57,minor_male,미성인 남성,ice4,아이스크림4,none,1,0,32,1,저녁
+57,minor_male,미성인 남성,ice3,아이스크림3,none,1,0,4,1,저녁
+57,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,16,1,저녁
+58,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,3,1,저녁
+58,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,4,1,저녁
+59,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+60,unknown,미확인,none,none,none,1,0,0,1,저녁
+61,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+62,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+63,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+64,unknown,미확인,none,none,none,1,0,0,1,저녁
+65,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,16,1,저녁
+65,minor_male,미성인 남성,ice4,아이스크림4,none,1,0,3,1,저녁
+66,unknown,미확인,none,none,none,1,0,0,1,저녁
+67,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+68,unknown,미확인,none,none,none,1,0,0,1,저녁
+69,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+70,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+71,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+72,unknown,미확인,none,none,none,1,0,0,1,저녁
+73,unknown,미확인,none,none,none,1,0,0,1,저녁
+74,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,23,1,저녁
+74,minor_male,미성인 남성,ice3,아이스크림3,none,1,0,21,1,저녁
+74,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,19,1,저녁
+74,minor_male,미성인 남성,ice4,아이스크림4,none,1,0,8,1,저녁
+75,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+76,unknown,미확인,none,none,none,1,0,0,1,저녁
+77,unknown,미확인,none,none,none,1,0,0,1,저녁
+78,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+79,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+80,minor_male,미성인 남성,ice3,아이스크림3,none,1,0,24,1,저녁
+81,unknown,미확인,none,none,none,1,0,0,1,저녁
+82,unknown,미확인,none,none,none,1,0,0,1,저녁
+83,unknown,미확인,none,none,none,1,0,0,1,저녁
+84,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+85,adult_male,성인 남성,ice5,아이스크림5,none,1,0,26,1,저녁
+86,unknown,미확인,none,none,none,1,0,0,1,저녁
+87,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+88,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+89,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+90,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+91,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+92,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+93,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+94,unknown,미확인,none,none,none,1,0,0,1,저녁
+95,unknown,미확인,none,none,none,1,0,0,1,저녁
+96,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+97,minor_female,미성인 여성,ice2,아이스크림2,none,1,0,4,1,저녁
+97,minor_female,미성인 여성,ice5,아이스크림5,none,1,0,5,1,저녁
+98,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,7,1,저녁
+98,minor_male,미성인 남성,ice1,아이스크림1,none,1,0,4,1,저녁
+98,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,4,1,저녁
+98,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,4,1,저녁
+99,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+100,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+101,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+102,unknown,미확인,none,none,none,1,0,0,1,저녁
+103,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+104,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+105,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+106,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+107,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,3,1,저녁
+108,unknown,미확인,none,none,none,1,0,0,1,저녁
+109,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,10,1,저녁
+110,minor_male,미성인 남성,ice3,아이스크림3,none,1,0,16,1,저녁
+110,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,63,1,저녁
+111,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+112,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+113,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+114,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,15,1,저녁
+114,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,35,1,저녁
+114,minor_male,미성인 남성,ice1,아이스크림1,none,1,0,4,1,저녁
+114,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,12,1,저녁
+114,minor_male,미성인 남성,ice3,아이스크림3,none,1,0,7,1,저녁
+115,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+116,unknown,미확인,none,none,none,1,0,0,1,저녁
+117,unknown,미확인,none,none,none,1,0,0,1,저녁
+118,adult_male,성인 남성,ice5,아이스크림5,none,1,0,21,1,저녁
+118,adult_male,성인 남성,ice2,아이스크림2,none,1,0,9,1,저녁
+118,adult_male,성인 남성,ice1,아이스크림1,none,1,0,25,1,저녁
+118,adult_male,성인 남성,ice6,아이스크림6,none,1,0,13,1,저녁
+118,adult_male,성인 남성,ice4,아이스크림4,none,1,0,10,1,저녁
+119,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+120,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,4,1,저녁
+120,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,4,1,저녁
+121,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+122,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+123,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,11,1,저녁
+123,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,9,1,저녁
+123,minor_male,미성인 남성,ice3,아이스크림3,none,1,0,18,1,저녁
+123,minor_male,미성인 남성,ice2,아이스크림2,none,1,0,3,1,저녁
+123,minor_male,미성인 남성,ice1,아이스크림1,none,1,0,4,1,저녁
+124,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+125,unknown,미확인,none,none,none,1,0,0,1,저녁
+126,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,5,1,저녁
+127,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+128,unknown,미확인,none,none,none,1,0,0,1,저녁
+129,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,8,1,저녁
+129,minor_male,미성인 남성,ice1,아이스크림1,none,1,0,45,1,저녁
+130,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,3,1,저녁
+131,unknown,미확인,none,none,none,1,0,0,1,저녁
+132,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+133,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+134,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+135,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,20,1,저녁
+135,minor_male,미성인 남성,ice1,아이스크림1,none,1,0,3,1,저녁
+136,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+137,unknown,미확인,none,none,none,1,0,0,1,저녁
+138,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+139,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+140,minor_male,미성인 남성,none,none,none,1,0,0,1,저녁
+141,minor_male,미성인 남성,ice5,아이스크림5,none,1,0,20,1,저녁
+141,minor_male,미성인 남성,ice6,아이스크림6,none,1,0,4,1,저녁
+141,minor_male,미성인 남성,ice1,아이스크림1,none,1,0,18,1,저녁
+142,unknown,미확인,none,none,none,1,0,0,1,저녁
+143,adult_male,성인 남성,none,none,none,1,0,0,1,저녁
+144,unknown,미확인,none,none,none,1,0,0,1,-
+145,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+146,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+147,unknown,미확인,none,none,none,1,0,0,1,-
+148,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+149,unknown,미확인,none,none,none,1,0,0,1,-
+150,unknown,미확인,none,none,none,1,0,0,1,-
+151,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+152,unknown,미확인,none,none,none,1,0,0,1,-
+153,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+154,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+155,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+156,unknown,미확인,none,none,none,1,0,0,1,-
+157,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+158,adult_male,성인 남성,none,none,none,1,0,0,1,-
+159,minor_male,미성인 남성,none,none,none,1,0,0,1,-
+160,adult_male,성인 남성,none,none,none,1,0,0,1,-
+161,adult_male,성인 남성,none,none,none,1,0,0,1,-
+162,adult_male,성인 남성,none,none,none,1,0,0,1,-

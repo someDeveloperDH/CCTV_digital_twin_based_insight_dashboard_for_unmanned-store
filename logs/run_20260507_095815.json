@@ -1,0 +1,67 @@
+{
+  "day": "10",
+  "started": "2026-05-07T09:58:12.688552",
+  "stages": [
+    {
+      "stage": "data",
+      "label": "데이터 확인",
+      "passed": true,
+      "elapsed_sec": 0.3,
+      "meta": {
+        "total_merged": 3,
+        "timeline_ratio": 1.0
+      }
+    },
+    {
+      "stage": "mosaic",
+      "label": "얼굴 모자이크",
+      "passed": true,
+      "elapsed_sec": 2.5,
+      "meta": {
+        "mosaic_metrics": [
+          {
+            "frames": 0,
+            "faces": 0,
+            "fps": 0.0,
+            "skipped": true
+          },
+          {
+            "frames": 0,
+            "faces": 0,
+            "fps": 0.0,
+            "skipped": true
+          },
+          {
+            "frames": 0,
+            "faces": 0,
+            "fps": 0.0,
+            "skipped": true
+          }
+        ]
+      }
+    },
+    {
+      "stage": "zones",
+      "label": "구역 설정 확인",
+      "passed": false,
+      "elapsed_sec": 0.0,
+      "meta": {
+        "cam_stats": {
+          "ch3": [
+            0,
+            0
+          ],
+          "ch6": [
+            0,
+            0
+          ],
+          "ch1": [
+            0,
+            0
+          ]
+        },
+        "total": 9
+      }
+    }
+  ]
+}

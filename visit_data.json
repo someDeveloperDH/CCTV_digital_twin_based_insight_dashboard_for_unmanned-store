@@ -1,0 +1,2652 @@
+{
+  "V0001": {
+    "visit_id": "V0001",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "08:41:56",
+    "exit_time": "08:42:35",
+    "timeband": "오전",
+    "matched_store_tracks": 0
+  },
+  "V0002": {
+    "visit_id": "V0002",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "08:42:38",
+    "exit_time": "08:42:52",
+    "timeband": "오전",
+    "matched_store_tracks": 0
+  },
+  "V0003": {
+    "visit_id": "V0003",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "08:42:58",
+    "exit_time": "08:43:07",
+    "timeband": "오전",
+    "matched_store_tracks": 0
+  },
+  "V0004": {
+    "visit_id": "V0004",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:07:46",
+    "exit_time": "12:07:47",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0005": {
+    "visit_id": "V0005",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:07:49",
+    "exit_time": "12:07:51",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0006": {
+    "visit_id": "V0006",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림2": 32.4,
+      "아이스크림4": 10.8,
+      "아이스크림5": 40.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:07:52",
+    "exit_time": "12:07:56",
+    "timeband": "오후",
+    "matched_store_tracks": 2
+  },
+  "V0007": {
+    "visit_id": "V0007",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:10:27",
+    "exit_time": "12:10:35",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0008": {
+    "visit_id": "V0008",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:10:34",
+    "exit_time": "12:10:34",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0009": {
+    "visit_id": "V0009",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:10:39",
+    "exit_time": "12:10:43",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0010": {
+    "visit_id": "V0010",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:10:52",
+    "exit_time": "12:10:55",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0011": {
+    "visit_id": "V0011",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:10:56",
+    "exit_time": "12:10:56",
+    "timeband": "오후",
+    "matched_store_tracks": 1
+  },
+  "V0012": {
+    "visit_id": "V0012",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:10:57",
+    "exit_time": "12:10:57",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0013": {
+    "visit_id": "V0013",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:11:00",
+    "exit_time": "12:11:19",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0014": {
+    "visit_id": "V0014",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:11:22",
+    "exit_time": "12:12:16",
+    "timeband": "오후",
+    "matched_store_tracks": 2
+  },
+  "V0015": {
+    "visit_id": "V0015",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "F",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:11:36",
+    "exit_time": "12:11:57",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0016": {
+    "visit_id": "V0016",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:12:06",
+    "exit_time": "12:12:06",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0017": {
+    "visit_id": "V0017",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:12:21",
+    "exit_time": "12:12:23",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0018": {
+    "visit_id": "V0018",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:12:23",
+    "exit_time": "12:14:59",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0019": {
+    "visit_id": "V0019",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "12:12:53",
+    "exit_time": "12:12:53",
+    "timeband": "오후",
+    "matched_store_tracks": 1
+  },
+  "V0020": {
+    "visit_id": "V0020",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 10.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "14:11:57",
+    "exit_time": "14:11:57",
+    "timeband": "오후",
+    "matched_store_tracks": 3
+  },
+  "V0021": {
+    "visit_id": "V0021",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "14:11:58",
+    "exit_time": "14:11:59",
+    "timeband": "오후",
+    "matched_store_tracks": 3
+  },
+  "V0022": {
+    "visit_id": "V0022",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "14:45:23",
+    "exit_time": "14:45:25",
+    "timeband": "오후",
+    "matched_store_tracks": 2
+  },
+  "V0023": {
+    "visit_id": "V0023",
+    "cameras": [
+      "ch1",
+      "ch6",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 7.6
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "14:45:48",
+    "exit_time": "14:45:49",
+    "timeband": "오후",
+    "matched_store_tracks": 2
+  },
+  "V0024": {
+    "visit_id": "V0024",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림2": 4.6,
+      "아이스크림5": 38.400000000000006
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "14:49:23",
+    "exit_time": "15:09:56",
+    "timeband": "오후",
+    "matched_store_tracks": 6
+  },
+  "V0025": {
+    "visit_id": "V0025",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": true,
+    "zones": {
+      "아이스크림5": 123.0,
+      "아이스크림6": 3.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "15:10:20",
+    "exit_time": "15:35:07",
+    "timeband": "오후",
+    "matched_store_tracks": 2
+  },
+  "V0026": {
+    "visit_id": "V0026",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 3.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "15:55:22",
+    "exit_time": "15:55:23",
+    "timeband": "오후",
+    "matched_store_tracks": 2
+  },
+  "V0027": {
+    "visit_id": "V0027",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "15:55:31",
+    "exit_time": "15:55:40",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0028": {
+    "visit_id": "V0028",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "15:56:04",
+    "exit_time": "15:56:04",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0029": {
+    "visit_id": "V0029",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "15:56:13",
+    "exit_time": "15:56:19",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0030": {
+    "visit_id": "V0030",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "15:56:14",
+    "exit_time": "15:56:18",
+    "timeband": "오후",
+    "matched_store_tracks": 4
+  },
+  "V0031": {
+    "visit_id": "V0031",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:36:32",
+    "exit_time": "16:36:33",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0032": {
+    "visit_id": "V0032",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:36:33",
+    "exit_time": "16:36:56",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0033": {
+    "visit_id": "V0033",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:36:41",
+    "exit_time": "16:36:43",
+    "timeband": "오후",
+    "matched_store_tracks": 1
+  },
+  "V0034": {
+    "visit_id": "V0034",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 5.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:36:55",
+    "exit_time": "16:36:59",
+    "timeband": "오후",
+    "matched_store_tracks": 2
+  },
+  "V0035": {
+    "visit_id": "V0035",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:36:57",
+    "exit_time": "16:36:57",
+    "timeband": "오후",
+    "matched_store_tracks": 1
+  },
+  "V0036": {
+    "visit_id": "V0036",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:36:58",
+    "exit_time": "16:37:00",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0037": {
+    "visit_id": "V0037",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:37:01",
+    "exit_time": "16:37:02",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0038": {
+    "visit_id": "V0038",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:37:23",
+    "exit_time": "16:37:23",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0039": {
+    "visit_id": "V0039",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:37:25",
+    "exit_time": "16:37:25",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0040": {
+    "visit_id": "V0040",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:37:44",
+    "exit_time": "16:37:55",
+    "timeband": "오후",
+    "matched_store_tracks": 0
+  },
+  "V0041": {
+    "visit_id": "V0041",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:38:10",
+    "exit_time": "16:38:10",
+    "timeband": "오후",
+    "matched_store_tracks": 1
+  },
+  "V0042": {
+    "visit_id": "V0042",
+    "cameras": [
+      "ch1",
+      "ch6",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 38.8,
+      "아이스크림1": 6.4,
+      "아이스크림6": 3.6
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "16:38:11",
+    "exit_time": "17:57:07",
+    "timeband": "오후",
+    "matched_store_tracks": 18
+  },
+  "V0043": {
+    "visit_id": "V0043",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 4.6,
+      "아이스크림4": 5.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "17:57:05",
+    "exit_time": "17:58:25",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0044": {
+    "visit_id": "V0044",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "17:57:15",
+    "exit_time": "17:58:26",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0045": {
+    "visit_id": "V0045",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "17:58:25",
+    "exit_time": "17:58:27",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0046": {
+    "visit_id": "V0046",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "17:59:28",
+    "exit_time": "17:59:28",
+    "timeband": "저녁",
+    "matched_store_tracks": 6
+  },
+  "V0047": {
+    "visit_id": "V0047",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:00:41",
+    "exit_time": "18:00:59",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0048": {
+    "visit_id": "V0048",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 3.0,
+      "아이스크림4": 6.2,
+      "아이스크림2": 7.6
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:01:07",
+    "exit_time": "18:11:29",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0049": {
+    "visit_id": "V0049",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 17.8,
+      "아이스크림6": 12.600000000000001
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:11:53",
+    "exit_time": "18:11:58",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0050": {
+    "visit_id": "V0050",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림4": 13.4,
+      "아이스크림5": 7.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:12:31",
+    "exit_time": "18:12:33",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0051": {
+    "visit_id": "V0051",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 3.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:24:06",
+    "exit_time": "18:24:08",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0052": {
+    "visit_id": "V0052",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:24:10",
+    "exit_time": "18:28:22",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0053": {
+    "visit_id": "V0053",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 3.0,
+      "아이스크림4": 10.2
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:28:23",
+    "exit_time": "18:28:32",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0054": {
+    "visit_id": "V0054",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:29:26",
+    "exit_time": "18:29:27",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0055": {
+    "visit_id": "V0055",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:29:28",
+    "exit_time": "18:29:28",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0056": {
+    "visit_id": "V0056",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림3": 3.2,
+      "아이스크림2": 8.6
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:29:51",
+    "exit_time": "18:29:52",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0057": {
+    "visit_id": "V0057",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 51.800000000000004,
+      "아이스크림4": 31.799999999999997,
+      "아이스크림3": 4.4,
+      "아이스크림2": 16.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:29:53",
+    "exit_time": "18:29:55",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0058": {
+    "visit_id": "V0058",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 3.4,
+      "아이스크림2": 4.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:29:55",
+    "exit_time": "18:29:55",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0059": {
+    "visit_id": "V0059",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:29:59",
+    "exit_time": "18:30:00",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0060": {
+    "visit_id": "V0060",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:30:02",
+    "exit_time": "18:30:03",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0061": {
+    "visit_id": "V0061",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:31:04",
+    "exit_time": "18:31:17",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0062": {
+    "visit_id": "V0062",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:34:14",
+    "exit_time": "18:35:23",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0063": {
+    "visit_id": "V0063",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:34:21",
+    "exit_time": "18:34:21",
+    "timeband": "저녁",
+    "matched_store_tracks": 4
+  },
+  "V0064": {
+    "visit_id": "V0064",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:35:15",
+    "exit_time": "18:35:18",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0065": {
+    "visit_id": "V0065",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 15.600000000000001,
+      "아이스크림4": 3.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:35:15",
+    "exit_time": "18:35:18",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0066": {
+    "visit_id": "V0066",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:35:22",
+    "exit_time": "18:35:24",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0067": {
+    "visit_id": "V0067",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:35:23",
+    "exit_time": "18:35:24",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0068": {
+    "visit_id": "V0068",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:36:06",
+    "exit_time": "18:36:07",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0069": {
+    "visit_id": "V0069",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:36:09",
+    "exit_time": "18:36:11",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0070": {
+    "visit_id": "V0070",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:36:40",
+    "exit_time": "18:36:42",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0071": {
+    "visit_id": "V0071",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:36:41",
+    "exit_time": "18:36:49",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0072": {
+    "visit_id": "V0072",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:36:48",
+    "exit_time": "18:36:49",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0073": {
+    "visit_id": "V0073",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:44:16",
+    "exit_time": "18:44:17",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0074": {
+    "visit_id": "V0074",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림2": 23.0,
+      "아이스크림3": 21.0,
+      "아이스크림5": 18.6,
+      "아이스크림4": 7.6
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:44:21",
+    "exit_time": "18:45:21",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0075": {
+    "visit_id": "V0075",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:44:27",
+    "exit_time": "18:44:27",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0076": {
+    "visit_id": "V0076",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:44:57",
+    "exit_time": "18:44:57",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0077": {
+    "visit_id": "V0077",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "18:45:20",
+    "exit_time": "18:45:20",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0078": {
+    "visit_id": "V0078",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": true,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "19:31:54",
+    "exit_time": "19:31:55",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0079": {
+    "visit_id": "V0079",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "19:49:10",
+    "exit_time": "19:50:25",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0080": {
+    "visit_id": "V0080",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림3": 24.200000000000003
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "19:50:27",
+    "exit_time": "19:50:29",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0081": {
+    "visit_id": "V0081",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "19:50:51",
+    "exit_time": "19:50:52",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0082": {
+    "visit_id": "V0082",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "19:51:14",
+    "exit_time": "19:51:14",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0083": {
+    "visit_id": "V0083",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "19:51:15",
+    "exit_time": "19:51:16",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0084": {
+    "visit_id": "V0084",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:32:17",
+    "exit_time": "20:32:18",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0085": {
+    "visit_id": "V0085",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": true,
+    "zones": {
+      "아이스크림5": 26.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:32:18",
+    "exit_time": "20:32:24",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0086": {
+    "visit_id": "V0086",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:32:20",
+    "exit_time": "20:32:20",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0087": {
+    "visit_id": "V0087",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:32:23",
+    "exit_time": "20:32:24",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0088": {
+    "visit_id": "V0088",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": true,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:32:27",
+    "exit_time": "20:32:31",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0089": {
+    "visit_id": "V0089",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:33:06",
+    "exit_time": "20:42:10",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0090": {
+    "visit_id": "V0090",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:33:15",
+    "exit_time": "20:33:19",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0091": {
+    "visit_id": "V0091",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:41:57",
+    "exit_time": "20:42:28",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0092": {
+    "visit_id": "V0092",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:42:13",
+    "exit_time": "20:42:24",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0093": {
+    "visit_id": "V0093",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:42:29",
+    "exit_time": "20:42:30",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0094": {
+    "visit_id": "V0094",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:42:31",
+    "exit_time": "20:42:31",
+    "timeband": "저녁",
+    "matched_store_tracks": 4
+  },
+  "V0095": {
+    "visit_id": "V0095",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:42:33",
+    "exit_time": "20:42:33",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0096": {
+    "visit_id": "V0096",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:43:13",
+    "exit_time": "20:43:15",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0097": {
+    "visit_id": "V0097",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "F",
+    "is_adult": false,
+    "zones": {
+      "아이스크림2": 4.0,
+      "아이스크림5": 5.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "20:43:42",
+    "exit_time": "20:43:50",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0098": {
+    "visit_id": "V0098",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림2": 7.0,
+      "아이스크림1": 4.4,
+      "아이스크림6": 3.8,
+      "아이스크림5": 4.2
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:54:31",
+    "exit_time": "21:54:32",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0099": {
+    "visit_id": "V0099",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:54:33",
+    "exit_time": "21:55:08",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0100": {
+    "visit_id": "V0100",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:54:35",
+    "exit_time": "21:54:36",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0101": {
+    "visit_id": "V0101",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:54:56",
+    "exit_time": "21:55:06",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0102": {
+    "visit_id": "V0102",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:55:12",
+    "exit_time": "21:55:13",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0103": {
+    "visit_id": "V0103",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:55:15",
+    "exit_time": "21:56:12",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0104": {
+    "visit_id": "V0104",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:55:15",
+    "exit_time": "21:56:21",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0105": {
+    "visit_id": "V0105",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:56:17",
+    "exit_time": "22:02:53",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0106": {
+    "visit_id": "V0106",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "21:56:21",
+    "exit_time": "22:02:48",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0107": {
+    "visit_id": "V0107",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 3.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:02:50",
+    "exit_time": "22:02:52",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0108": {
+    "visit_id": "V0108",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:03:36",
+    "exit_time": "22:03:37",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0109": {
+    "visit_id": "V0109",
+    "cameras": [
+      "ch1",
+      "ch6",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 10.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:03:37",
+    "exit_time": "22:03:39",
+    "timeband": "저녁",
+    "matched_store_tracks": 5
+  },
+  "V0110": {
+    "visit_id": "V0110",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림3": 16.2,
+      "아이스크림2": 62.599999999999994
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:04:26",
+    "exit_time": "22:04:52",
+    "timeband": "저녁",
+    "matched_store_tracks": 5
+  },
+  "V0111": {
+    "visit_id": "V0111",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:04:40",
+    "exit_time": "22:04:44",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0112": {
+    "visit_id": "V0112",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:04:47",
+    "exit_time": "22:04:53",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0113": {
+    "visit_id": "V0113",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:05:51",
+    "exit_time": "22:05:52",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0114": {
+    "visit_id": "V0114",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 15.4,
+      "아이스크림6": 34.599999999999994,
+      "아이스크림1": 3.8,
+      "아이스크림2": 12.0,
+      "아이스크림3": 7.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:40:09",
+    "exit_time": "22:40:56",
+    "timeband": "저녁",
+    "matched_store_tracks": 17
+  },
+  "V0115": {
+    "visit_id": "V0115",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:52:17",
+    "exit_time": "22:52:18",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0116": {
+    "visit_id": "V0116",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:52:35",
+    "exit_time": "22:52:35",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0117": {
+    "visit_id": "V0117",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:52:44",
+    "exit_time": "22:52:47",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0118": {
+    "visit_id": "V0118",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": true,
+    "zones": {
+      "아이스크림5": 21.0,
+      "아이스크림2": 9.4,
+      "아이스크림1": 25.4,
+      "아이스크림6": 13.0,
+      "아이스크림4": 10.4
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "22:53:12",
+    "exit_time": "23:21:41",
+    "timeband": "저녁",
+    "matched_store_tracks": 7
+  },
+  "V0119": {
+    "visit_id": "V0119",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:22:19",
+    "exit_time": "23:22:21",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0120": {
+    "visit_id": "V0120",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림6": 3.8,
+      "아이스크림5": 3.6
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:23:04",
+    "exit_time": "23:23:06",
+    "timeband": "저녁",
+    "matched_store_tracks": 4
+  },
+  "V0121": {
+    "visit_id": "V0121",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:23:08",
+    "exit_time": "23:23:38",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0122": {
+    "visit_id": "V0122",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:23:39",
+    "exit_time": "23:23:49",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0123": {
+    "visit_id": "V0123",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 11.4,
+      "아이스크림6": 9.2,
+      "아이스크림3": 17.8,
+      "아이스크림2": 3.4,
+      "아이스크림1": 4.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:23:51",
+    "exit_time": "23:24:05",
+    "timeband": "저녁",
+    "matched_store_tracks": 6
+  },
+  "V0124": {
+    "visit_id": "V0124",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:24:35",
+    "exit_time": "23:24:36",
+    "timeband": "저녁",
+    "matched_store_tracks": 12
+  },
+  "V0125": {
+    "visit_id": "V0125",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:24:37",
+    "exit_time": "23:24:38",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0126": {
+    "visit_id": "V0126",
+    "cameras": [
+      "ch1",
+      "ch6",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림6": 4.6
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:25:47",
+    "exit_time": "23:26:03",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0127": {
+    "visit_id": "V0127",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:26:09",
+    "exit_time": "23:26:15",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0128": {
+    "visit_id": "V0128",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:26:42",
+    "exit_time": "23:26:42",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0129": {
+    "visit_id": "V0129",
+    "cameras": [
+      "ch1",
+      "ch6",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 7.6,
+      "아이스크림1": 45.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:26:46",
+    "exit_time": "23:27:10",
+    "timeband": "저녁",
+    "matched_store_tracks": 6
+  },
+  "V0130": {
+    "visit_id": "V0130",
+    "cameras": [
+      "ch1",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 3.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:26:49",
+    "exit_time": "23:27:33",
+    "timeband": "저녁",
+    "matched_store_tracks": 8
+  },
+  "V0131": {
+    "visit_id": "V0131",
+    "cameras": [
+      "ch1",
+      "ch6",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:27:01",
+    "exit_time": "23:27:01",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0132": {
+    "visit_id": "V0132",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:27:45",
+    "exit_time": "23:27:46",
+    "timeband": "저녁",
+    "matched_store_tracks": 1
+  },
+  "V0133": {
+    "visit_id": "V0133",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:27:53",
+    "exit_time": "23:28:08",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0134": {
+    "visit_id": "V0134",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:29:08",
+    "exit_time": "23:29:08",
+    "timeband": "저녁",
+    "matched_store_tracks": 4
+  },
+  "V0135": {
+    "visit_id": "V0135",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림6": 20.0,
+      "아이스크림1": 3.0
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:29:09",
+    "exit_time": "23:29:14",
+    "timeband": "저녁",
+    "matched_store_tracks": 5
+  },
+  "V0136": {
+    "visit_id": "V0136",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:29:59",
+    "exit_time": "23:30:12",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0137": {
+    "visit_id": "V0137",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:30:20",
+    "exit_time": "23:30:20",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0138": {
+    "visit_id": "V0138",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:30:30",
+    "exit_time": "23:30:37",
+    "timeband": "저녁",
+    "matched_store_tracks": 0
+  },
+  "V0139": {
+    "visit_id": "V0139",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:30:41",
+    "exit_time": "23:30:41",
+    "timeband": "저녁",
+    "matched_store_tracks": 5
+  },
+  "V0140": {
+    "visit_id": "V0140",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:46:50",
+    "exit_time": "23:48:19",
+    "timeband": "저녁",
+    "matched_store_tracks": 7
+  },
+  "V0141": {
+    "visit_id": "V0141",
+    "cameras": [
+      "ch1",
+      "ch3",
+      "ch6"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {
+      "아이스크림5": 20.2,
+      "아이스크림6": 3.6,
+      "아이스크림1": 17.6
+    },
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:48:39",
+    "exit_time": "23:49:03",
+    "timeband": "저녁",
+    "matched_store_tracks": 4
+  },
+  "V0142": {
+    "visit_id": "V0142",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:49:10",
+    "exit_time": "23:49:12",
+    "timeband": "저녁",
+    "matched_store_tracks": 3
+  },
+  "V0143": {
+    "visit_id": "V0143",
+    "cameras": [
+      "ch1",
+      "ch3"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": "23:49:11",
+    "exit_time": "23:49:15",
+    "timeband": "저녁",
+    "matched_store_tracks": 2
+  },
+  "V0144": {
+    "visit_id": "V0144",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0145": {
+    "visit_id": "V0145",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0146": {
+    "visit_id": "V0146",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0147": {
+    "visit_id": "V0147",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0148": {
+    "visit_id": "V0148",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0149": {
+    "visit_id": "V0149",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0150": {
+    "visit_id": "V0150",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0151": {
+    "visit_id": "V0151",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0152": {
+    "visit_id": "V0152",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0153": {
+    "visit_id": "V0153",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0154": {
+    "visit_id": "V0154",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0155": {
+    "visit_id": "V0155",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0156": {
+    "visit_id": "V0156",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": null,
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0157": {
+    "visit_id": "V0157",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0158": {
+    "visit_id": "V0158",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0159": {
+    "visit_id": "V0159",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": false,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0160": {
+    "visit_id": "V0160",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0161": {
+    "visit_id": "V0161",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": null,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  },
+  "V0162": {
+    "visit_id": "V0162",
+    "cameras": [
+      "ch1"
+    ],
+    "gender": "M",
+    "is_adult": true,
+    "zones": {},
+    "purchased": false,
+    "purchased_items": [],
+    "entry_time": null,
+    "exit_time": null,
+    "timeband": "-",
+    "matched_store_tracks": 0
+  }
+}
