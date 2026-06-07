@@ -36,7 +36,7 @@
 |------|--------------------------------------------------------------|
 | **안은정** <br> (PM) | -KPI 지표 연구 및 선정 <br> -UI/UX 설계 <br> - 데이터 컨텍 및 수집 <br> - 데이터셋 전처리 (`PurchaseGridDataset`) <br> - 문서화작업 (판넬, PPT, 보고서 ) <br> - 비즈니스 서비스 구상 <br> - LSTM KPI 예측모델 설계 및 실험 |
 | **이준구** <br> (시뮬레이터 대시보드 - 개발) | - Transformer 예측 모델 설계·학습 (`model/model.py`, `train.py`) <br> - SpaceTimeBlock(공간+시간 이중 어텐션) 구현 <br> - FastAPI 예측 서버 구현 (`server/`) <br> - 모델 성능 평가 및 비교 분석  React 시뮬레이션 대시보드 개발 (`simul/`) <br> - MiVOLO v2 실험 <br>  - Web Worker 기반 4개월 배치 시뮬레이션 (`simulationWorker.js`) <br> - 실측 KPI 기반 시뮬레이터 보정(Calibration)  <br> - AI 예측 패널 및 히트맵 시각화 <br> - 키포인트 기반 성별·나이 판별 (생체역학 모델) <br> - 대시보드 구현 |
-| **박동혁** <br> (CCTV분석 - 개발)  | - CCTV 영상 분석 파이프라인 설계 및 구현 (`run_pipeline.py`) <br> - YOLOv8-pose 기반 사람 감지·추적(BoT-SORT, Re-ID) <br> - 키포인트 기반 성별·나이 판별 (생체역학 모델) <br> - MiVOLO v2 후처리 분류 연동 <br> - 구역 체류·구매 판정 로직 및 KPI CSV 내보내기  <br> - 데이터셋 전처리 (`PurchaseGridDataset`) <br> - Crossformer 다중 KPI 예측 모델 구현 (`kpi_crossformer.py`)<br> - 데이터셋 전처리 (`PurchaseGridDataset`)|
+| **박동혁** <br> (CCTV분석 - 개발)  | - CCTV 영상 분석 파이프라인 설계 및 구현 (`run_pipeline.py`)<br> - 영상 모자이크 전처리 및 분석 <br> - YOLOv8-pose 기반 사람 감지 및 추적(BoT-SORT, Re-ID) <br> - 키포인트 기반 성별·나이 판별 (생체역학 모델) <br> - MiVOLO v2 후처리 분류 연동 <br> - 구역 체류·구매 판정 로직 및 KPI CSV 내보내기  <br> - 데이터셋 전처리 (`PurchaseGridDataset`) <br> - Crossformer 다중 KPI 예측 모델 구현 (`kpi_crossformer.py`)<br> - 데이터셋 전처리 (`PurchaseGridDataset`)|
 
 
 <br>
